@@ -130,20 +130,3 @@ struct Conway2DTestHex
         return false;
     }
 };
-
-
-int main()
-{
-    Conway2D<11, Conway2DTest> conway{};
-    conway.set(5, 4);
-    conway.set(5, 5);
-    conway.set(5, 6);
-
-    conway.set(4, 5);
-
-    for (int i = 0; i < 14; ++i)
-    {
-        conway.print();
-        conway.step();
-    }
-}

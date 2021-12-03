@@ -16,7 +16,10 @@
 #include <chrono>
 #include <tuple>
 
+#include "conway.h"
 
+
+using namespace std;
 namespace fs = std::filesystem;
 
 
@@ -145,7 +148,7 @@ void check_result(T value, T expected)
 {
     if (value != expected)
     {
-        std::cout << "\nERROR: expected = " << expected << "; value = " << value << '\n';
+        std::cout << "\nERROR: expected = " << expected << " but got = " << value << '\n';
     }
 }
 
