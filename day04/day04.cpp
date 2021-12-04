@@ -8,12 +8,10 @@ struct Board
 
     void set_row(int r, string data)
     {
-        istringstream is{data};
+        auto temp  = aoc::split(data, " ", false);
         for (int c = 0; c < 5; ++c)
         {
-            int val;
-            is >> val;
-            cells[r][c] = val;
+            cells[r][c] = stoi(temp[c]);
         }
     }
 
@@ -108,16 +106,28 @@ int part2(vector<int> calls, vector<Board> boards)
 }
 
 
+// Simple equivalent to Python: [trans(x) for x in src if pred(x)].
+template <typename Src, typename Pred, typename Trans>
+auto comprehend(const Src src, const Pred pred, const Trans trans)
+{
+    static_assert(is_same_v<Src, vector<Src::value_type>>);
+
+    std::vector<decltype(trans(src[0]))> dest;
+    for (const auto& value: src)
+    {
+        if (pred(value))
+            dest.emplace_back(trans(value));
+    }
+    return dest;
+}
+
+
 void run(const char* filename)
 {
     auto input = aoc::read_lines(filename, false);
 
-    vector<int> calls;
     auto temp  = aoc::split(input[0], ",", false);
-    for (auto str: temp)
-    {
-        calls.push_back(stoi(str));
-    }
+    auto calls = comprehend(temp, [](auto){return true;}, [](auto s){return stoi(s);});
 
     vector<Board> boards;
     int i = 1;
