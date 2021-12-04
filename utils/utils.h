@@ -153,6 +153,22 @@ void check_result(T value, T expected)
 }
 
 
+// Simple equivalent to Python: [trans(x) for x in src if pred(x)].
+template <typename Src, typename Pred, typename Trans>
+auto comprehend(const Src src, const Pred pred, const Trans trans)
+{
+    static_assert(is_same_v<Src, vector<Src::value_type>>);
+
+    std::vector<decltype(trans(src[0]))> dest;
+    for (const auto& value: src)
+    {
+        if (pred(value))
+            dest.emplace_back(trans(value));
+    }
+    return dest;
+}
+
+
 } // namespace aoc {
 
 
