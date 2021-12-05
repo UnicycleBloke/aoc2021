@@ -22,12 +22,7 @@ int part1(const T& input)
 
     }
 
-    int overlaps{};
-    for (int y = 0; y < SIZE; ++y)
-        for (int x = 0; x < SIZE; ++x)
-            overlaps += (grid[x][y] > 1);
-
-    return overlaps;
+    return overlaps();
 }
 
 
@@ -49,6 +44,12 @@ int part2(const T& input)
         }              
     }
 
+    return overlaps();
+}
+
+
+int overlaps()
+{
     int overlaps{};
     for (int y = 0; y < SIZE; ++y)
         for (int x = 0; x < SIZE; ++x)
