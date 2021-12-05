@@ -157,7 +157,7 @@ void check_result(T value, T expected)
 template <typename Src, typename Pred, typename Trans>
 auto comprehend(const Src src, const Pred pred, const Trans trans)
 {
-    static_assert(is_same_v<Src, vector<Src::value_type>>);
+    static_assert(is_same_v<Src, vector<typename Src::value_type>>);
 
     std::vector<decltype(trans(src[0]))> dest;
     for (const auto& value: src)
@@ -166,6 +166,13 @@ auto comprehend(const Src src, const Pred pred, const Trans trans)
             dest.emplace_back(trans(value));
     }
     return dest;
+}
+
+
+template <typename T> 
+int sgn(T val) 
+{
+    return (T(0) < val) - (val < T(0));
 }
 
 
