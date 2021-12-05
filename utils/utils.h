@@ -148,7 +148,7 @@ void check_result(T value, T expected)
 {
     if (value != expected)
     {
-        std::cout << "\nERROR: expected = " << expected << " but got = " << value << '\n';
+        std::cout << "ERROR: expected = " << expected << " but got = " << value << '\n';
     }
 }
 
