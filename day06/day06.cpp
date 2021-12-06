@@ -5,7 +5,6 @@ uint64_t reproduce(vector<int> input, int days)
 {
     array<uint64_t, 9> n{};
 
-    uint64_t total = input.size();
     for (int f: input)
     {
         ++n[(f + 1)];
@@ -13,14 +12,11 @@ uint64_t reproduce(vector<int> input, int days)
 
     for (int d = 0; d <= days; ++d)
     {
-        auto rep = n[0];
         rotate(n.begin(), n.begin() + 1, n.end());
-        total += rep;
-        n[6]  += rep;
-        n[8]   = rep;
+        n[6]  += n[8];
     }
 
-    return total;
+    return accumulate(n.begin(), n.end(), uint64_t{});
 }
 
 
