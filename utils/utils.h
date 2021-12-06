@@ -84,7 +84,7 @@ std::vector<T> read_ints(std::istream& is)
 template <class... Args>
 std::tuple<Args...> parse_line(const std::regex& re, const std::string& str)
 {
-    // Capture values from a string using regex, and stuff these 
+    // Capture values from a string using regex, and stuff these
     // into a new space-delimited string.
     std::smatch matches;
     std::stringstream ss{};
@@ -97,7 +97,7 @@ std::tuple<Args...> parse_line(const std::regex& re, const std::string& str)
         }
     }
 
-    // Read from the space-delimited string into a tuple.   
+    // Read from the space-delimited string into a tuple.
     auto res = std::tuple<Args...>{};
     std::apply
     (
@@ -125,7 +125,7 @@ std::vector<std::tuple<Args...>> read_lines(std::istream& is, std::string pat)
     std::vector<std::tuple<Args...>> result;
     const std::regex re(pat);
 
-    auto lines = read_lines(is, false);   
+    auto lines = read_lines(is, false);
     for (const auto& line: lines)
     {
         result.push_back(parse_line<Args...>(re, line));
@@ -143,10 +143,14 @@ std::vector<std::tuple<Args...>> read_lines(std::string filename, std::string pa
 }
 
 
-template <typename T>
-void check_result(T value, T expected)
+template <typename T, typename U>
+void check_result(T value, U expected)
 {
-    if (value != expected)
+    static_assert(std::is_integral_v<T> && std::is_integral_v<U>);
+    static_assert(sizeof(T) >= sizeof(U));
+    static_assert(std::is_signed_v<T> == std::is_signed_v<U>);
+
+    if (value != static_cast<T>(expected))
     {
         std::cout << "ERROR: expected = " << expected << " but got = " << value << '\n';
     }
@@ -169,8 +173,8 @@ auto comprehend(const Src src, const Pred pred, const Trans trans)
 }
 
 
-template <typename T> 
-int sgn(T val) 
+template <typename T>
+int sgn(T val)
 {
     return (T(0) < val) - (val < T(0));
 }

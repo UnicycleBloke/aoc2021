@@ -3,7 +3,7 @@
 
 uint64_t reproduce(vector<int> input, int days)
 {
-    array<uint64_t, 10> n{};
+    array<uint64_t, 9> n{};
 
     uint64_t total = input.size();
     for (int f: input)
@@ -13,18 +13,11 @@ uint64_t reproduce(vector<int> input, int days)
 
     for (int d = 0; d <= days; ++d)
     {
-        auto temp = n[0]; 
-        total += temp;
-
-        n[0] = n[1];
-        n[1] = n[2];
-        n[2] = n[3];
-        n[3] = n[4];
-        n[4] = n[5];
-        n[5] = n[6];
-        n[6] = n[7] + temp;
-        n[7] = n[8];
-        n[8] = temp;
+        auto rep = n[0];
+        rotate(n.begin(), n.begin() + 1, n.end());
+        total += rep;
+        n[6]  += rep;
+        n[8]   = rep;
     }
 
     return total;
@@ -57,11 +50,11 @@ void run(const char* filename)
 
     auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 390011ull);
+    aoc::check_result(p1, 390011UL);
 
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 1746710169834ull);
+    aoc::check_result(p2, 1746710169834UL);
 }
 
 
