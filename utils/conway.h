@@ -1,40 +1,51 @@
 #include <iostream>
 #include <string>
 #include <array>
+#include <memory>
+
+
+namespace aoc {
 
 
 template <int SIZE, template<typename> typename TEST>
 class Conway2D
 {
+public:
     using grid_t  = std::array<std::array<bool, SIZE>, SIZE>;
     using alive_t = TEST<grid_t>;
 
-public:
+    explicit Conway2D()
+    {
+        // Heap-based grids to not blow the stack. 
+        m_grids[0] = std::make_unique<grid_t>();
+        m_grids[1] = std::make_unique<grid_t>();
+    }
+
+    grid_t& curr_grid() const { return *m_grids[m_curr]; }
+    grid_t& prev_grid() const { return *m_grids[(m_curr + 1) % 2]; }
+
     void step()
     {
-        int prev = m_curr;
-        int curr = (prev + 1) % 2;
+        m_curr = (m_curr + 1) % 2;
 
         alive_t alive;
         for (int x = 1; x < (SIZE-1); ++x)
         {
             for (int y = 1; y < (SIZE-1); ++y)
             {
-                m_grids[curr][x][y] = alive(m_grids[prev], x, y);
+                curr_grid()[x][y] = alive(prev_grid(), x, y);
             }
         }
-
-        m_curr = curr;
     }
 
     bool get(int x, int y) const
     {
-        return m_grids[m_curr][x][y];
+        return curr_grid()[x][y];
     }
 
     void set(int x, int y)
     {
-        m_grids[m_curr][x][y] = true;
+        curr_grid()[x][y] = true;
     }
 
     int count() const
@@ -44,7 +55,7 @@ public:
         {
             for (int y = 1; y < (SIZE-1); ++y)
             {
-                sum += m_grids[m_curr][x][y];
+                sum += curr_grid()[x][y];
             }
         }
         return sum;
@@ -56,7 +67,7 @@ public:
         {
             for (int x = 1; x < (SIZE-1); ++x)
             {
-                std::cout << (m_grids[m_curr][x][y] ? 'O' : '.') << ' ';
+                std::cout << (curr_grid()[x][y] ? 'O' : '.') << ' ';
             }
             std::cout << '\n';
         }
@@ -64,8 +75,8 @@ public:
     }
 
 private:
-    grid_t m_grids[2]{};
-    int    m_curr = 0;
+    std::unique_ptr<grid_t> m_grids[2]{};
+    int                     m_curr = 0;
 };
 
 
@@ -130,3 +141,7 @@ struct Conway2DTestHex
         return false;
     }
 };
+
+
+} // namespace aoc {
+

@@ -1,31 +1,82 @@
 #include "utils.h"
 
 
-template <typename T>
-int part1(const T& input)
+int part1(vector<int> input)
 {
-    return 0;
+    for (int c = 0; c < 80; ++c)
+    {
+        vector<int> temp;
+        temp.reserve(1000000);
+        for (int f: input)
+        {
+            if (f > 0)
+            {
+                temp.push_back(f - 1);
+            }
+            else
+            {
+                temp.push_back(6);
+                temp.push_back(8);
+            }
+        }
+
+        input = temp;
+        cout << " " << input.size();
+    }
+
+    return input.size();
 }
 
 
-template <typename T>
-int part2(const T& input)
+uint64_t part2(vector<int> input)
 {
-    return 0;
+    array<uint64_t, 10> n{};
+
+    uint64_t total = input.size();
+    for (int f: input)
+    {
+        ++n[(f + 1)];
+    }
+
+    for (int d = 0; d < 257; ++d)
+    {
+        auto temp = n[0]; 
+        total += temp;
+
+        n[0] = n[1];
+        n[1] = n[2];
+        n[2] = n[3];
+        n[3] = n[4];
+        n[4] = n[5];
+        n[5] = n[6];
+        n[6] = n[7] + temp;
+        n[7] = n[8];
+        n[8] = temp;
+    }
+
+    return total;
 }
 
 
 void run(const char* filename)
 {
-    auto input = aoc::read_lines<int, int, int, int>(filename, R"((\d+),(\d+)\s->\s(\d+),(\d+))");
+    ifstream is{filename};
+    vector<int> input;
+    while (is)
+    {
+        int i;
+        char c;
+        is >> i >> c;
+        input.push_back(i);
+    }
 
-    auto p1 = part1(input);
-    cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 0);
+    //auto p1 = part1(input);
+    //cout << "Part1: " << p1 << '\n';
+    //aoc::check_result(p1, 0);
 
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 0);
+    //aoc::check_result(p2, 0);
 }
 
 
