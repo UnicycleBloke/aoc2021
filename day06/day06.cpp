@@ -24,35 +24,16 @@ uint64_t reproduce(vector<int> input, int days)
 }
 
 
-auto part1(const vector<int>& input)
-{
-    return reproduce(input, 80);
-}
-
-
-auto part2(const vector<int>& input)
-{
-    return reproduce(input, 256);
-}
-
-
 void run(const char* filename)
 {
-    ifstream is{filename};
-    vector<int> input;
-    while (is)
-    {
-        int i;
-        char c;
-        is >> i >> c;
-        input.push_back(i);
-    }
+    auto lines = aoc::read_lines(filename);
+    auto input = aoc::make_vector<int>(lines[0]);
 
-    auto p1 = part1(input);
+    auto p1 = reproduce(input, 80);
     cout << "Part1: " << p1 << '\n';
     aoc::check_result(p1, 390011UL);
 
-    auto p2 = part2(input);
+    auto p2 = reproduce(input, 256);
     cout << "Part2: " << p2 << '\n';
     aoc::check_result(p2, 1746710169834UL);
 }

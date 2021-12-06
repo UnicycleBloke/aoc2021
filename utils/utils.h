@@ -39,6 +39,25 @@ std::vector<std::string> read_lines(std::string filename, bool allow_blanks = fa
 std::vector<std::string> read_groups(std::istream& is);
 std::vector<std::string> read_groups(std::string filename);
 
+// Convert a list of delimited values into an array. Assumes all values are of the same type.
+// "1,2,3" => vector<int>{1, 2, 3}.
+template <typename T>
+std::vector<T> make_vector(std::string input, std::string delim = ",")
+{
+    trim(input);
+    input = replace(input, delim, " ");
+
+    std::vector<T> result;
+    std::istringstream is{input};
+    while (!is.eof())
+    {
+        T value;
+        is >> value;
+        result.emplace_back(value);
+    }
+
+    return result;
+}
 
 template <typename T>
 std::vector<T> read_ints(std::istream& is)
