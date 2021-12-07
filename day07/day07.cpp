@@ -4,41 +4,27 @@
 template <typename T>
 auto part1(const T& input)
 {
-    auto range    = *max_element(input.begin(), input.end());
-    auto min_fuel = 1'000'000'000;
-
-    for (auto i = 0; i < range; ++i)
-    {
-        auto fuel = 0;
-        for (auto j = 0; j < input.size(); ++j)
-            fuel += abs(input[j] - i);
-
-        min_fuel = min(min_fuel, fuel);
-    }
-
-    return min_fuel;
+    auto fuel = 1'000'000'000;
+    for (auto i = 0; i < *max_element(input.begin(), input.end()); ++i)
+        fuel = min(fuel, accumulate(input.begin(), input.end(), 0, [i](auto sum, auto j)
+        { 
+            return sum + abs(i - j); 
+        }));
+    return fuel;
 }
 
 
 template <typename T>
 auto part2(const T& input)
 {
-    auto range    = *max_element(input.begin(), input.end());
-    auto min_fuel = 1'000'000'000;
-
-    for (auto i = 0; i < range; ++i)
-    {
-        auto fuel = 0;
-        for (auto j = 0; j < input.size(); ++j)
-        {
-            auto diff = abs(input[j] - i);
-            fuel += diff * (diff + 1) / 2;
-        }
-
-        min_fuel = min(min_fuel, fuel);
-    }
-
-    return min_fuel;
+    auto fuel = 1'000'000'000;
+    for (auto i = 0; i < *max_element(input.begin(), input.end()); ++i)
+        fuel = min(fuel, accumulate(input.begin(), input.end(), 0, [i](auto sum, auto j)
+        { 
+            auto f = abs(i - j); 
+            return sum + f * (f + 1) / 2; 
+        }));
+    return fuel;
 }
 
 
