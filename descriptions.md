@@ -6,3 +6,4 @@
 - Day 4: Squid bingo - read lines in groups to create bingo cards, first line is the series of calls.
 - Day 5: Lines of vents - draw lines on the sea floor and count the overlaps. Regex file reader worked like a charm.
 - Day 6: Exponential growth of fish population - kind of a lagged Fibonacci series. Must learn to not brute force Part 1!!!
+- Day 7: Crab submarine alignment - minimise a cost function - sure to be a nice mathsy way, but O(N^2) solution was fine.

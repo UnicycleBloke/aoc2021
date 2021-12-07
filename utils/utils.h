@@ -18,6 +18,7 @@
 #include <tuple>
 
 #include "conway.h"
+#include "range.h"
 
 
 using namespace std;
