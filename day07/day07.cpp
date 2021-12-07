@@ -4,7 +4,7 @@
 template <typename T>
 auto part1(const T& input)
 {
-    auto fuel = 1'000'000'000;
+    auto fuel = numeric_limits<typename T::value_type>::max();
     for (auto i = 0; i < *max_element(input.begin(), input.end()); ++i)
         fuel = min(fuel, accumulate(input.begin(), input.end(), 0, [i](auto sum, auto j)
         { 
@@ -17,7 +17,7 @@ auto part1(const T& input)
 template <typename T>
 auto part2(const T& input)
 {
-    auto fuel = 1'000'000'000;
+    auto fuel = numeric_limits<typename T::value_type>::max();
     for (auto i = 0; i < *max_element(input.begin(), input.end()); ++i)
         fuel = min(fuel, accumulate(input.begin(), input.end(), 0, [i](auto sum, auto j)
         { 

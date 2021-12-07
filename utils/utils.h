@@ -8,6 +8,7 @@
 #include <array>
 #include <numeric>
 #include <algorithm>
+#include <limits>
 
 #include <string>
 #include <regex>
