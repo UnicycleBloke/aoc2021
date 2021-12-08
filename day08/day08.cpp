@@ -1,33 +1,6 @@
 #include "utils.h"
 
 
-template <typename T>
-auto part1(const T& input)
-{
-    auto fuel = numeric_limits<typename T::value_type>::max();
-    for (auto i = 0; i < *max_element(input.begin(), input.end()); ++i)
-        fuel = min(fuel, accumulate(input.begin(), input.end(), 0, [i](auto sum, auto j)
-        { 
-            return sum + abs(i - j); 
-        }));
-    return fuel;
-}
-
-
-template <typename T>
-auto part2(const T& input)
-{
-    auto fuel = numeric_limits<typename T::value_type>::max();
-    for (auto i = 0; i < *max_element(input.begin(), input.end()); ++i)
-        fuel = min(fuel, accumulate(input.begin(), input.end(), 0, [i](auto sum, auto j)
-        { 
-            auto f = abs(i - j); 
-            return sum + f * (f + 1) / 2; 
-        }));
-    return fuel;
-}
-
-
 int to_int(string s)
 {
     int res = 0;
@@ -50,12 +23,9 @@ int to_int(string s)
 
 void run(const char* filename)
 {
-    int n1 = 0;
-    int n4 = 0;
-    int n7 = 0;
-    int n8 = 0;
+    size_t part1 = 0;
+    size_t part2 = 0;
 
-    int total = 0;
     auto lines = aoc::read_lines(filename);
     for (auto line: lines)
     {
@@ -63,13 +33,15 @@ void run(const char* filename)
         auto segs   = aoc::split(s[0], " ", false);
         auto digits = aoc::split(s[1], " ", false);
 
-        n1 += count_if(digits.begin(), digits.end(), [](auto s) { return s.size() == 2; });
-        n4 += count_if(digits.begin(), digits.end(), [](auto s) { return s.size() == 4; });
-        n7 += count_if(digits.begin(), digits.end(), [](auto s) { return s.size() == 3; });
-        n8 += count_if(digits.begin(), digits.end(), [](auto s) { return s.size() == 7; });
+        // Part 1
+        part1 += count_if(digits.begin(), digits.end(), [](auto s) { return s.size() == 2; });
+        part1 += count_if(digits.begin(), digits.end(), [](auto s) { return s.size() == 4; });
+        part1 += count_if(digits.begin(), digits.end(), [](auto s) { return s.size() == 3; });
+        part1 += count_if(digits.begin(), digits.end(), [](auto s) { return s.size() == 7; });
 
-        array<int, 10> si{};
-        map<int, int> sm{};
+        // Part 2
+        array<size_t, 10> si{};
+        map<size_t, size_t> sm{};
 
         for (auto s: segs)
         {
@@ -82,7 +54,8 @@ void run(const char* filename)
             }
         }
 
-        // Got 1,4,7,8 
+        // Got  1,4,7,8
+        // Need 2,3,5,6,9,0
         for (auto s: segs)
         {
             switch (s.size())
@@ -90,7 +63,6 @@ void run(const char* filename)
                 case 5: // 2,3,5
                     if ((to_int(s) & si[1]) == si[1])
                     {
-                        cout << "got 3: " << s << "\n";
                         si[3] = to_int(s);
                         sm[si[3]] = 3;
                     }
@@ -99,21 +71,20 @@ void run(const char* filename)
                 case 6: // 0,9,6
                     if ((to_int(s) & si[4]) == si[4])
                     {
-                        cout << "got 9: " << s << "\n";
                         si[9] = to_int(s);
                         sm[si[9]] = 9;
-                    } 
+                    }
                     if ((to_int(s) & si[7]) != si[7])
                     {
-                        cout << "got 6: " << s << "\n";
                         si[6] = to_int(s);
                         sm[si[6]] = 6;
-                    } 
+                    }
                     break;
             }
-        } 
+        }
 
-        // Got 1,3,4,6,7,8,9 
+        // Got  1,3,4,6,7,8,9
+        // Need 2,5,0
         for (auto s: segs)
         {
             switch (s.size())
@@ -121,7 +92,6 @@ void run(const char* filename)
                 case 5: // 2,5
                     if ((to_int(s) & si[6]) == to_int(s))
                     {
-                        cout << "got 5: " << s << "\n";
                         si[5] = to_int(s);
                         sm[si[5]] = 5;
                     }
@@ -130,14 +100,15 @@ void run(const char* filename)
                 case 6: // 0
                     if (to_int(s) != si[6] && to_int(s) != si[9])
                     {
-                        cout << "got 0: " << s << "\n";
                         si[0] = to_int(s);
                         sm[si[0]] = 0;
-                    } 
+                    }
                     break;
             }
-        } 
+        }
 
+        // Got  1,3,4,5,6,7,8,9,0
+        // Need 2
         for (auto s: segs)
         {
             switch (s.size())
@@ -145,43 +116,24 @@ void run(const char* filename)
                 case 5: // 2
                     if (to_int(s) != si[3] && to_int(s) != si[5])
                     {
-                        cout << "got 2: " << s << "\n";
                         si[2] = to_int(s);
                         sm[si[2]] = 2;
-                    } 
+                    }
                     break;
             }
-        } 
+        }
 
-        // for (auto [k, v] : sm)
-        // {
-        //     cout << k << ':' << v << '\n';
-        // }
-        // cout << '\n';
-
-        int val = 0;
+        size_t val = 0;
         val += 1000 * sm[to_int(digits[0])];
         val += 100 * sm[to_int(digits[1])];
         val += 10 * sm[to_int(digits[2])];
         val += sm[to_int(digits[3])];
 
-        //for (auto d: digits)        
-        //    cout << d << '>' << sm[to_int(d)] << '\n';
-        cout << val << '\n';
-        total += val;
+        part2 += val;
     }
-    //auto input = aoc::make_vector<int>(lines[0]);
-    cout << total << '\n';
 
-    cout << n1 << ' ' << n4 << ' ' << n7 << ' ' << n8 << ' ' << (n1+n4+n7+n8);
-
-    // auto p1 = part1(input);
-    // cout << "Part1: " << p1 << '\n';
-    // aoc::check_result(p1, 340052);
-
-    // auto p2 = part2(input);
-    // cout << "Part2: " << p2 << '\n';
-    // aoc::check_result(p2, 92948968);
+    cout << "Part 1; " << part1 << '\n';
+    cout << "Part 2; " << part2 << '\n';
 }
 
 
