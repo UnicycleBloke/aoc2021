@@ -1,9 +1,9 @@
 #include "utils.h"
 
 
-int to_int(string s)
+size_t to_int(string s)
 {
-    int res = 0;
+    size_t res = 0;
     for (auto c: s)
     {
         switch (c)
@@ -43,6 +43,7 @@ void run(const char* filename)
         array<size_t, 10> si{};
         map<size_t, size_t> sm{};
 
+        // Decoding in stages based on number of characters and bit patterns corresponding to them.
         for (auto s: segs)
         {
             switch (s.size())
@@ -123,6 +124,7 @@ void run(const char* filename)
             }
         }
 
+        // Finally, what is the number the display?
         size_t val = 0;
         val += 1000 * sm[to_int(digits[0])];
         val += 100 * sm[to_int(digits[1])];
@@ -131,6 +133,9 @@ void run(const char* filename)
 
         part2 += val;
     }
+
+    aoc::check_result<size_t>(part1, 416U);
+    aoc::check_result<size_t>(part2, 1043697U);
 
     cout << "Part 1; " << part1 << '\n';
     cout << "Part 2; " << part2 << '\n';
