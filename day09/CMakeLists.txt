@@ -7,7 +7,6 @@ project(${AOC_PROGRAM_NAME} LANGUAGES CXX)
 add_executable(${AOC_PROGRAM_NAME}
     day09.cpp
     ../utils/utils.cpp
-    ../utils/main.cpp
 )
 
 target_include_directories(${AOC_PROGRAM_NAME} PUBLIC
