@@ -66,7 +66,12 @@ int basin_size_iterate(T& input, U i, U j)
 
         auto check_valid = [&](Pos p)
         {
-            if (input[p.x][p.y] < 9) { input[p.x][p.y] = 10; valid.push({p.x, p.y}); }
+            if (input[p.x][p.y] < 9)
+            {
+                // Mark as already counted - higher than all neighbours.
+                input[p.x][p.y] = 10;
+                valid.push({p.x, p.y});
+            }
         };
 
         check_valid({p.x+1, p.y});
