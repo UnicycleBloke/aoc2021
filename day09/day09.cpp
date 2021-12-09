@@ -1,5 +1,7 @@
 #include "utils.h"
+#ifdef __unix__
 #include "/usr/include/ncurses.h"
+#endif
 
 
 template <typename T>
@@ -31,20 +33,22 @@ auto part1(const T& input)
 template <typename T>
 auto render(T& input)
 {
-    // for (auto i: aoc::range{1U, input.size()-1U})
-    // {
-    //     for (auto j: aoc::range{1U, input[i].size()-1U})
-    //     {
-    //         int height = input[i][j];
-    //         auto colour = (height % 2 == 0) ? 1 : 2;
-    //         colour = (height == 9) ? 3 : colour;
-    //         attron(COLOR_PAIR(colour));
-    //         mvaddch(i, j, '0' + height);
-    //         attroff(COLOR_PAIR(colour));
-    //     }
-    // }
-    // refresh();
+#ifdef __unix__
+    for (auto i: aoc::range{1U, input.size()-1U})
+    {
+        for (auto j: aoc::range{1U, input[i].size()-1U})
+        {
+            int height = input[i][j];
+            auto colour = (height % 2 == 0) ? 1 : 2;
+            colour = (height == 9) ? 3 : colour;
+            attron(COLOR_PAIR(colour));
+            mvaddch(i, j, '0' + height);
+            attroff(COLOR_PAIR(colour));
+        }
+    }
+    refresh();
     //getch();
+#endif
 }
 
 
@@ -131,7 +135,6 @@ auto part2(T& input)
                 sizes.push_back(size);
 
                 render(input);
-                //getch();
             }
         }
     }
@@ -143,7 +146,7 @@ auto part2(T& input)
 }
 
 
-void run2(const char* filename)
+void run_impl(const char* filename)
 {
     auto lines = aoc::read_lines(filename);
     vector<int> row(lines[0].size()+2, 9);
@@ -165,26 +168,27 @@ void run2(const char* filename)
 
 void run(const char* filename)
 {
+#ifdef __unix__
     initscr(); 
-
     // if (has_colors() == FALSE) 
     // {
     //     endwin();
     //     printf("Your terminal does not support color\n");
     //     return; //exit(1);
     // }
-
     cbreak();
     noecho();   
-
     start_color(); // if has_colors()
     init_pair(1, COLOR_RED,   COLOR_BLACK);
     init_pair(2, COLOR_BLUE,  COLOR_BLACK);
     init_pair(3, COLOR_GREEN, COLOR_BLACK);
+#endif    
 
-    run2(filename);
+    run_impl(filename);
 
+#ifdef __unix__
     endwin();
+#endif    
 }
 
 
@@ -205,7 +209,7 @@ int main(int argc, char** argv)
             return -1;
         }
 
-        run2(argv[1]);
+        run(argv[1]);
     }
     catch (std::exception& e)
     {
