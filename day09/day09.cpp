@@ -31,19 +31,19 @@ auto part1(const T& input)
 template <typename T>
 auto render(T& input)
 {
-    for (auto i: aoc::range{1U, input.size()-1U})
-    {
-        for (auto j: aoc::range{1U, input[i].size()-1U})
-        {
-            int height = input[i][j];
-            auto colour = (height % 2 == 0) ? 1 : 2;
-            colour = (height == 9) ? 3 : colour;
-            attron(COLOR_PAIR(colour));
-            mvaddch(i, j, '0' + height);
-            attroff(COLOR_PAIR(colour));
-        }
-    }
-    refresh();
+    // for (auto i: aoc::range{1U, input.size()-1U})
+    // {
+    //     for (auto j: aoc::range{1U, input[i].size()-1U})
+    //     {
+    //         int height = input[i][j];
+    //         auto colour = (height % 2 == 0) ? 1 : 2;
+    //         colour = (height == 9) ? 3 : colour;
+    //         attron(COLOR_PAIR(colour));
+    //         mvaddch(i, j, '0' + height);
+    //         attroff(COLOR_PAIR(colour));
+    //     }
+    // }
+    // refresh();
     //getch();
 }
 
@@ -205,7 +205,7 @@ int main(int argc, char** argv)
             return -1;
         }
 
-        run(argv[1]);
+        run2(argv[1]);
     }
     catch (std::exception& e)
     {
