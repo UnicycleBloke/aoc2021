@@ -1,16 +1,13 @@
 #include "utils.h"
 
 
-constexpr int SIZE = 100;
-
-
 template <typename T>
 auto part1(const T& input)
 {
     int total_risk = 0;
-    for (auto i: aoc::range(1, SIZE+1))
+    for (auto i: aoc::range{1U, input.size()-1U})
     {
-        for (auto j: aoc::range(1, SIZE+1))
+        for (auto j: aoc::range{1U, input[i].size()-1U})
         {
             int  height = input[i][j];
             bool low = true;
@@ -31,12 +28,12 @@ auto part1(const T& input)
 
 
 // Recursively explore the basin
-template <typename T>
-int basin_size(T& input, int i, int j)
+template <typename T, typename U>
+int basin_size(T& input, U i, U j)
 {
     if (input[i][j] < 9)
-    {    
-        // Mark as already counted - higher than all neighbours.    
+    {
+        // Mark as already counted - higher than all neighbours.
         input[i][j] = 10;
 
         int size = 1;
@@ -54,10 +51,10 @@ template <typename T>
 auto part2(T& input)
 {
     vector<int> sizes;
-    for (auto i: aoc::range(1, SIZE+1))
+    for (auto i: aoc::range{1U, input.size()-1U})
     {
-        for (auto j: aoc::range(1, SIZE+1))
-        {            
+        for (auto j: aoc::range{1U, input[i].size()-1U})
+        {
             int  height = input[i][j];
             bool low = true;
             low = low && (height < input[i+1][j]);
@@ -66,7 +63,7 @@ auto part2(T& input)
             low = low && (height < input[i][j-1]);
 
             if (low)
-            {        
+            {
                 int size = basin_size(input, i, j);
                 sizes.push_back(size);
             }
@@ -84,24 +81,12 @@ auto part2(T& input)
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename);
-    array<array<int, SIZE+2>, SIZE+2> input{};
+    vector<int> row(lines[0].size()+2, 9);
+    vector<vector<int>> input(lines.size()+2, row);
 
-    // Use a grid with a border of 9s to obviate complicated boundary tests.
-    for (auto i: aoc::range(SIZE+2))
-    {
-        for (auto j: aoc::range(SIZE+2))
-        {
-            input[i][j] = 9;
-        }
-    }
-
-    for (int i = 1; i <= lines.size(); ++i)
-    {
-        for (int j = 1; j <= lines[0].size(); ++j)
-        {
+    for (auto i: aoc::range{1U, input.size()-1U})
+        for (auto j: aoc::range{1U, input[i].size()-1U})
             input[i][j] = lines[i-1][j-1] - '0';
-        }
-    }
 
     auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
