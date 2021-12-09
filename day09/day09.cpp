@@ -29,7 +29,7 @@ auto part1(const T& input)
 
 // Recursively explore the basin
 template <typename T, typename U>
-int basin_size(T& input, U i, U j)
+int basin_size_recurse(T& input, U i, U j)
 {
     if (input[i][j] < 9)
     {
@@ -47,6 +47,38 @@ int basin_size(T& input, U i, U j)
 }
 
 
+template <typename T, typename U>
+int basin_size_iterate(T& input, U i, U j)
+{
+    int size = 0;
+
+    struct Pos { U x; U y; };
+    queue<Pos> valid;
+
+    input[i][j] = 10;
+    valid.push({i, j});
+
+    while (valid.size() > 0)
+    {
+        Pos p = valid.front();
+        valid.pop();
+        ++size;
+
+        auto check_valid = [&](Pos p)
+        {
+            if (input[p.x][p.y] < 9) { input[p.x][p.y] = 10; valid.push({p.x, p.y}); }
+        };
+
+        check_valid({p.x+1, p.y});
+        check_valid({p.x-1, p.y});
+        check_valid({p.x, p.y+1});
+        check_valid({p.x, p.y-1});
+    }
+
+    return size;
+}
+
+
 template <typename T>
 auto part2(T& input)
 {
@@ -55,7 +87,8 @@ auto part2(T& input)
     {
         for (auto j: aoc::range{1U, input[i].size()-1U})
         {
-            int  height = input[i][j];
+            int height = input[i][j];
+
             bool low = true;
             low = low && (height < input[i+1][j]);
             low = low && (height < input[i-1][j]);
@@ -64,10 +97,10 @@ auto part2(T& input)
 
             if (low)
             {
-                int size = basin_size(input, i, j);
+                //int size = basin_size_recurse(input, i, j);
+                int size  = basin_size_iterate(input, i, j);
                 sizes.push_back(size);
             }
-
         }
     }
 
