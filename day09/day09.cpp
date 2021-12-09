@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "/usr/include/ncurses.h"
 
 
 template <typename T>
@@ -27,6 +28,26 @@ auto part1(const T& input)
 }
 
 
+template <typename T>
+auto render(T& input)
+{
+    for (auto i: aoc::range{1U, input.size()-1U})
+    {
+        for (auto j: aoc::range{1U, input[i].size()-1U})
+        {
+            int height = input[i][j];
+            auto colour = (height % 2 == 0) ? 1 : 2;
+            colour = (height == 9) ? 3 : colour;
+            attron(COLOR_PAIR(colour));
+            mvaddch(i, j, '0' + height);
+            attroff(COLOR_PAIR(colour));
+        }
+    }
+    refresh();
+    //getch();
+}
+
+
 // Recursively explore the basin
 template <typename T, typename U>
 int basin_size_recurse(T& input, U i, U j)
@@ -35,12 +56,13 @@ int basin_size_recurse(T& input, U i, U j)
     {
         // Mark as already counted - higher than all neighbours.
         input[i][j] = 10;
+        render(input);
 
         int size = 1;
-        size += basin_size(input, i+1, j);
-        size += basin_size(input, i-1, j);
-        size += basin_size(input, i, j+1);
-        size += basin_size(input, i, j-1);
+        size += basin_size_recurse(input, i+1, j);
+        size += basin_size_recurse(input, i-1, j);
+        size += basin_size_recurse(input, i, j+1);
+        size += basin_size_recurse(input, i, j-1);
         return size;
     }
     return 0;
@@ -78,6 +100,8 @@ int basin_size_iterate(T& input, U i, U j)
         check_valid({p.x-1, p.y});
         check_valid({p.x, p.y+1});
         check_valid({p.x, p.y-1});
+
+        render(input);
     }
 
     return size;
@@ -102,9 +126,12 @@ auto part2(T& input)
 
             if (low)
             {
-                //int size = basin_size_recurse(input, i, j);
-                int size  = basin_size_iterate(input, i, j);
+                int size = basin_size_recurse(input, i, j);
+                //int size  = basin_size_iterate(input, i, j);
                 sizes.push_back(size);
+
+                render(input);
+                //getch();
             }
         }
     }
@@ -116,7 +143,7 @@ auto part2(T& input)
 }
 
 
-void run(const char* filename)
+void run2(const char* filename)
 {
     auto lines = aoc::read_lines(filename);
     vector<int> row(lines[0].size()+2, 9);
@@ -133,6 +160,31 @@ void run(const char* filename)
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
     aoc::check_result(p2, 1048128);
+}
+
+
+void run(const char* filename)
+{
+    initscr(); 
+
+    // if (has_colors() == FALSE) 
+    // {
+    //     endwin();
+    //     printf("Your terminal does not support color\n");
+    //     return; //exit(1);
+    // }
+
+    cbreak();
+    noecho();   
+
+    start_color(); // if has_colors()
+    init_pair(1, COLOR_RED,   COLOR_BLACK);
+    init_pair(2, COLOR_BLUE,  COLOR_BLACK);
+    init_pair(3, COLOR_GREEN, COLOR_BLACK);
+
+    run2(filename);
+
+    endwin();
 }
 
 

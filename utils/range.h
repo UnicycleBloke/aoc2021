@@ -5,9 +5,9 @@ template <typename T, typename U = T, typename V = T>
 class range
 {
     using value_type = decltype(T{} + U{} + V{});
-    static_assert( (is_signed_v<T> && is_signed_v<U> && is_signed_v<U>) ||
-                   (is_unsigned_v<T> && is_unsigned_v<U> && is_unsigned_v<U>),
-                   "Range types should be all signed or all unsigned" );
+    //static_assert( (is_signed_v<T> && is_signed_v<U> && is_signed_v<U>) ||
+    //               (is_unsigned_v<T> && is_unsigned_v<U> && is_unsigned_v<U>),
+    //               "Range types should be all signed or all unsigned" );
 
     public:
         range(T from, U to, V step = 1)

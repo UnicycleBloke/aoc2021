@@ -7,6 +7,17 @@ static constexpr int SIZE = 1000;
 array<array<int, SIZE>, SIZE> grid;
 
 
+int overlaps()
+{
+    int overlaps{};
+    for (int y = 0; y < SIZE; ++y)
+        for (int x = 0; x < SIZE; ++x)
+            overlaps += (grid[x][y] > 1);
+
+    return overlaps;
+}
+
+
 template <typename T>
 int part1(const T& input)
 {
@@ -45,17 +56,6 @@ int part2(const T& input)
     }
 
     return overlaps();
-}
-
-
-int overlaps()
-{
-    int overlaps{};
-    for (int y = 0; y < SIZE; ++y)
-        for (int x = 0; x < SIZE; ++x)
-            overlaps += (grid[x][y] > 1);
-
-    return overlaps;
 }
 
 
