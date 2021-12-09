@@ -1,13 +1,16 @@
 #include "utils.h"
 
 
+constexpr int SIZE = 100;
+
+
 template <typename T>
 auto part1(const T& input)
 {
     int total_risk = 0;
-    for (int i = 1; i <= 100; ++i)
+    for (auto i: aoc::range(1, SIZE+1))
     {
-        for (int j = 1; j <= 100; ++j)
+        for (auto j: aoc::range(1, SIZE+1))
         {
             int  height = input[i][j];
             bool low = true;
@@ -29,17 +32,18 @@ auto part1(const T& input)
 
 // Recursively explore the basin
 template <typename T>
-int basin_size_impl(T& input, int i, int j)
+int basin_size(T& input, int i, int j)
 {
     if (input[i][j] < 9)
-    {        
+    {    
+        // Mark as already counted - higher than all neighbours.    
         input[i][j] = 10;
 
         int size = 1;
-        size += basin_size_impl(input, i+1, j);
-        size += basin_size_impl(input, i-1, j);
-        size += basin_size_impl(input, i, j+1);
-        size += basin_size_impl(input, i, j-1);
+        size += basin_size(input, i+1, j);
+        size += basin_size(input, i-1, j);
+        size += basin_size(input, i, j+1);
+        size += basin_size(input, i, j-1);
         return size;
     }
     return 0;
@@ -47,41 +51,26 @@ int basin_size_impl(T& input, int i, int j)
 
 
 template <typename T>
-auto basin_size(T& input, int i, int j)
-{
-    // Already counted this cell
-    if (input[i][j] == 10) return 0;
-    // Not in any basin
-    if (input[i][j] == 9) return 0;
-
-    int  height = input[i][j];
-    bool low = true;
-    low = low && (height < input[i+1][j]);
-    low = low && (height < input[i-1][j]);
-    low = low && (height < input[i][j+1]);
-    low = low && (height < input[i][j-1]);
-
-    if (low)
-    {        
-        return basin_size_impl(input, i, j);
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-
-template <typename T>
 auto part2(T& input)
 {
     vector<int> sizes;
-    for (int i = 1; i <= 101; ++i)
+    for (auto i: aoc::range(1, SIZE+1))
     {
-        for (int j = 1; j <= 101; ++j)
+        for (auto j: aoc::range(1, SIZE+1))
         {            
-            int size = basin_size(input, i, j);
-            sizes.push_back(size);
+            int  height = input[i][j];
+            bool low = true;
+            low = low && (height < input[i+1][j]);
+            low = low && (height < input[i-1][j]);
+            low = low && (height < input[i][j+1]);
+            low = low && (height < input[i][j-1]);
+
+            if (low)
+            {        
+                int size = basin_size(input, i, j);
+                sizes.push_back(size);
+            }
+
         }
     }
 
@@ -95,12 +84,12 @@ auto part2(T& input)
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename);
-    array<array<int, 102>, 102> input{};
+    array<array<int, SIZE+2>, SIZE+2> input{};
 
     // Use a grid with a border of 9s to obviate complicated boundary tests.
-    for (int i = 0; i <= 101; ++i)
+    for (auto i: aoc::range(SIZE+2))
     {
-        for (int j = 0; j <= 101; ++j)
+        for (auto j: aoc::range(SIZE+2))
         {
             input[i][j] = 9;
         }
