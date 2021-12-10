@@ -1,138 +1,117 @@
 #include "utils.h"
 
 
-template <typename T>
-auto part1(const T& input)
+void validate(const string& line, size_t& pos, size_t& err, char exp)
 {
-    int total_risk = 0;
-    for (auto i: aoc::range{1U, input.size()-1U})
+    while ((pos < line.size()) && (err == 0))
     {
-        for (auto j: aoc::range{1U, input[i].size()-1U})
-        {
-            int  height = input[i][j];
-            bool low = true;
-            low = low && (height < input[i+1][j]);
-            low = low && (height < input[i-1][j]);
-            low = low && (height < input[i][j+1]);
-            low = low && (height < input[i][j-1]);
+        auto c = line[pos];
+        ++pos;
 
-            if (low)
-            {
-                total_risk += height + 1;
-            }
+        switch (c)
+        {
+            case ')': if (c != exp) { err = 3; }     return;
+            case ']': if (c != exp) { err = 57; }    return;
+            case '}': if (c != exp) { err = 1197; }  return;
+            case '>': if (c != exp) { err = 25137; } return;
+
+            case '(': validate(line, pos, err, ')'); break;
+            case '[': validate(line, pos, err, ']'); break;
+            case '{': validate(line, pos, err, '}'); break;
+            case '<': validate(line, pos, err, '>'); break;                
+        }
+    }
+}
+
+
+void complete(string& line, size_t& pos, size_t& err, char exp)
+{
+    while (pos < line.size())
+    {
+        auto c = line[pos];
+        ++pos;
+
+        switch (c)
+        {
+            case ')': 
+            case ']': 
+            case '}': 
+            case '>': return;
+
+            case '(': complete(line, pos, err, ')'); break;
+            case '[': complete(line, pos, err, ']'); break;
+            case '{': complete(line, pos, err, '}'); break;
+            case '<': complete(line, pos, err, '>'); break;                
         }
     }
 
-    return total_risk;
+    switch (exp)
+    {
+        case ')': err = err * 5 + 1; break;
+        case ']': err = err * 5 + 2; break;
+        case '}': err = err * 5 + 3; break;
+        case '>': err = err * 5 + 4; break;
+    }
 }
 
 
-// Recursively explore the basin
-template <typename T, typename U>
-int basin_size_recurse(T& input, U i, U j)
+template <typename T>
+auto part1(const T& input)
 {
-    if (input[i][j] < 9)
+    size_t errors = 0;
+
+    for (auto line: input)
     {
-        // Mark as already counted - higher than all neighbours.
-        input[i][j] = 10;
-
-        int size = 1;
-        size += basin_size(input, i+1, j);
-        size += basin_size(input, i-1, j);
-        size += basin_size(input, i, j+1);
-        size += basin_size(input, i, j-1);
-        return size;
-    }
-    return 0;
-}
-
-
-template <typename T, typename U>
-int basin_size_iterate(T& input, U i, U j)
-{
-    int size = 0;
-
-    struct Pos { U x; U y; };
-    queue<Pos> valid;
-
-    input[i][j] = 10;
-    valid.push({i, j});
-
-    while (valid.size() > 0)
-    {
-        Pos p = valid.front();
-        valid.pop();
-        ++size;
-
-        auto check_valid = [&](Pos p)
-        {
-            if (input[p.x][p.y] < 9)
-            {
-                // Mark as already counted - higher than all neighbours.
-                input[p.x][p.y] = 10;
-                valid.push({p.x, p.y});
-            }
-        };
-
-        check_valid({p.x+1, p.y});
-        check_valid({p.x-1, p.y});
-        check_valid({p.x, p.y+1});
-        check_valid({p.x, p.y-1});
+        size_t pos = 0;
+        size_t err = 0;
+        validate(line, pos, err, ' ');
+        errors += err;
     }
 
-    return size;
+    return errors;
 }
 
 
 template <typename T>
 auto part2(T& input)
 {
-    vector<int> sizes;
-    for (auto i: aoc::range{1U, input.size()-1U})
+    size_t errors = 0;
+    vector<string> valid;
+
+    for (auto line: input)
     {
-        for (auto j: aoc::range{1U, input[i].size()-1U})
-        {
-            int height = input[i][j];
-
-            bool low = true;
-            low = low && (height < input[i+1][j]);
-            low = low && (height < input[i-1][j]);
-            low = low && (height < input[i][j+1]);
-            low = low && (height < input[i][j-1]);
-
-            if (low)
-            {
-                //int size = basin_size_recurse(input, i, j);
-                int size  = basin_size_iterate(input, i, j);
-                sizes.push_back(size);
-            }
-        }
+        size_t pos = 0;
+        size_t err = 0;
+        validate(line, pos, err, ' ');
+        if (err == 0)
+            valid.push_back(line);
     }
 
-    sort(sizes.begin(), sizes.end());
-    reverse(sizes.begin(), sizes.end());
+    vector<size_t> scores;
+    for (auto line: valid)
+    {
+        size_t pos = 0;
+        size_t err = 0;
+        complete(line, pos, err, ' ');
+        scores.push_back(err);
+    }
 
-    return sizes[0] * sizes[1] * sizes[2];
+    sort(scores.begin(), scores.end());
+    return scores[scores.size() / 2];
 }
 
 
 void run(const char* filename)
 {
-    auto lines = aoc::read_lines(filename);
-    vector<int> row(lines[0].size()+2, 9);
-    vector<vector<int>> input(lines.size()+2, row);
-
-    for (auto i: aoc::range{1U, input.size()-1U})
-        for (auto j: aoc::range{1U, input[i].size()-1U})
-            input[i][j] = lines[i-1][j-1] - '0';
+    auto input = aoc::read_lines(filename);
 
     auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 494);
+    aoc::check_result(p1, 299793U);
 
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 1048128);
+    aoc::check_result(p2, 3654963618U);
 }
 
 
