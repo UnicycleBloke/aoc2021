@@ -7,6 +7,7 @@
 #include <set>
 #include <array>
 #include <queue>
+#include <stack>
 #include <numeric>
 #include <algorithm>
 #include <limits>

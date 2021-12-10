@@ -24,6 +24,27 @@ void validate(const string& line, size_t& pos, size_t& err, char exp)
 }
 
 
+size_t validate(const string& line)
+{
+    stack<char> s;
+    for (char c: line)
+    {
+        switch (c)
+        {
+            case ')': if (s.top() != '<') { return 3; }     s.pop(); 
+            case ']': if (s.top() != '<') { return 57; }    s.pop();
+            case '}': if (s.top() != '<') { return 1197; }  s.pop();
+            case '>': if (s.top() != '<') { return 25137; } s.pop();
+
+            case '(': 
+            case '[': 
+            case '{': 
+            case '<': s.push(c); break;                
+        }
+    }
+}
+
+
 void complete(string& line, size_t& pos, size_t& err, char exp)
 {
     while (pos < line.size())
@@ -63,9 +84,10 @@ auto part1(const T& input)
     for (auto line: input)
     {
         size_t pos = 0;
-        size_t err = 0;
-        validate(line, pos, err, ' ');
-        errors += err;
+        //size_t err = 0;
+        //validate(line, pos, err, ' ');
+        
+        errors += validate(line);
     }
 
     return errors;
