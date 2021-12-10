@@ -1,43 +1,35 @@
-#include <array>
+#include <vector>
 #include <stack>
 #include <string>
 #include <iostream>
 
-int main()
-{
-    size_t pc{};
-    std::string input = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
 
-    size_t pos{};
-    std::array<char, 20> memory{};
-    std::stack<size_t> stack;
+namespace aoc {
+
+
+//std::string input = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
+// Hello, World!
+void brainfuck(const std::string& input)
+{
+    size_t                  pc{};
+    size_t                  pos{};
+    std::vector<char>       memory(32000);
+    std::stack<size_t>      stack{};
 
     while (pc < input.size())
     {   
-        auto c = input[pc++];
-        //std::cout << c;    
-
-        //for (auto m: memory)
-        //    std::cout << m << ' ';
-        //std::cout << " pc=" << pc << " pos=" << pos << " op=" << c << " sz=" << stack.size() << '\n';
-
-        switch (c)
+        switch (input[pc++])
         {
             // Increment the data pointer (to point to the next cell to the right).
             case '>': ++pos; break;
-            
             // Decrement the data pointer (to point to the next cell to the left).
-            case '<': --pos; break;
-            
+            case '<': pos = (pos > 0) ? pos -1 : 0; break;
             // Increment (increase by one) the byte at the data pointer.
             case '+': ++memory[pos]; break;
-            
             // Decrement (decrease by one) the byte at the data pointer.
             case '-': --memory[pos]; break;
-            
             // Output the byte at the data pointer.
-            case '.': std::cout << memory[pos]; break; // << '\n'; break;
-            
+            case '.': std::cout << memory[pos]; break; ;
             // Accept one byte of input, storing its value in the byte at the data pointer. 
             case ',': std::cin >> memory[pos]; break;
             
@@ -47,7 +39,6 @@ int main()
             case '[': 
                 if (memory[pos] != 0)
                 {
-                    //std::cout << "push " << pc << '\n';
                     stack.push(pc);
                 }
                 else
@@ -59,7 +50,6 @@ int main()
                         count -= input[pc] == ']';
                         ++pc;
                     }
-                    //std::cout << "skip to " << pc << '\n';
                 }
                 break;
 
@@ -70,15 +60,15 @@ int main()
                 if (memory[pos] != 0) 
                 {
                     pc = stack.top();
-                    //std::cout << "mem[" << pos << "]=" << memory[pos] << " goto " << pc << '\n';
                 }
                 else
                 {
-                    //std::cout << "mem[" << pos << "]=" << memory[pos] << '\n';
                     stack.pop();
                 }
                 break;  
         }
-    }
-       
+    }       
 }
+
+
+} // namespace aoc {
