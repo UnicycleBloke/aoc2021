@@ -1,31 +1,64 @@
 #include "utils.h"
 
 
-void validate(const string& line, size_t& pos, size_t& err, char exp)
-{
-    while ((pos < line.size()) && (err == 0))
-    {
-        auto c = line[pos];
-        ++pos;
+// Original part 1
+// void validate(const string& line, size_t& pos, size_t& err, char exp)
+// {
+//     while ((pos < line.size()) && (err == 0))
+//     {
+//         auto c = line[pos];
+//         ++pos;
 
-        switch (c)
-        {
-            case ')': if (c != exp) { err = 3; }     return;
-            case ']': if (c != exp) { err = 57; }    return;
-            case '}': if (c != exp) { err = 1197; }  return;
-            case '>': if (c != exp) { err = 25137; } return;
+//         switch (c)
+//         {
+//             case ')': if (c != exp) { err = 3; }     return;
+//             case ']': if (c != exp) { err = 57; }    return;
+//             case '}': if (c != exp) { err = 1197; }  return;
+//             case '>': if (c != exp) { err = 25137; } return;
 
-            case '(': validate(line, pos, err, ')'); break;
-            case '[': validate(line, pos, err, ']'); break;
-            case '{': validate(line, pos, err, '}'); break;
-            case '<': validate(line, pos, err, '>'); break;                
-        }
-    }
-}
+//             case '(': validate(line, pos, err, ')'); break;
+//             case '[': validate(line, pos, err, ']'); break;
+//             case '{': validate(line, pos, err, '}'); break;
+//             case '<': validate(line, pos, err, '>'); break;                
+//         }
+//     }
+// }
+
+
+// Original part 2
+// void complete(string& line, size_t& pos, size_t& err, char exp)
+// {
+//     while (pos < line.size())
+//     {
+//         auto c = line[pos];
+//         ++pos;
+
+//         switch (c)
+//         {
+//             case ')': 
+//             case ']': 
+//             case '}': 
+//             case '>': return;
+
+//             case '(': complete(line, pos, err, ')'); break;
+//             case '[': complete(line, pos, err, ']'); break;
+//             case '{': complete(line, pos, err, '}'); break;
+//             case '<': complete(line, pos, err, '>'); break;                
+//         }
+//     }
+
+//     switch (exp)
+//     {
+//         case ')': err = err * 5 + 1; break;
+//         case ']': err = err * 5 + 2; break;
+//         case '}': err = err * 5 + 3; break;
+//         case '>': err = err * 5 + 4; break;
+//     }
+// }
 
 
 // Alternative stack-based solution. Better than recursion.
-size_t validate(const string& line)
+size_t validate2(const string& line, size_t& score)
 {
     stack<char> s;
     for (char c: line)
@@ -44,38 +77,21 @@ size_t validate(const string& line)
         }
     }
 
-    return 0;
-}
-
-
-void complete(string& line, size_t& pos, size_t& err, char exp)
-{
-    while (pos < line.size())
+    score = 0;
+    while (s.size())
     {
-        auto c = line[pos];
-        ++pos;
-
-        switch (c)
+        switch (s.top())
         {
-            case ')': 
-            case ']': 
-            case '}': 
-            case '>': return;
-
-            case '(': complete(line, pos, err, ')'); break;
-            case '[': complete(line, pos, err, ']'); break;
-            case '{': complete(line, pos, err, '}'); break;
-            case '<': complete(line, pos, err, '>'); break;                
+            case '(': score = score * 5 + 1; break;
+            case '[': score = score * 5 + 2; break;
+            case '{': score = score * 5 + 3; break;
+            case '<': score = score * 5 + 4; break;
         }
+
+        s.pop();
     }
 
-    switch (exp)
-    {
-        case ')': err = err * 5 + 1; break;
-        case ']': err = err * 5 + 2; break;
-        case '}': err = err * 5 + 3; break;
-        case '>': err = err * 5 + 4; break;
-    }
+    return 0;
 }
 
 
@@ -86,11 +102,8 @@ auto part1(const T& input)
 
     for (auto line: input)
     {
-        size_t pos = 0;
-        //size_t err = 0;
-        //validate(line, pos, err, ' ');
-        
-        errors += validate(line);
+        size_t dummy;
+        errors += validate2(line, dummy);
     }
 
     return errors;
@@ -100,25 +113,13 @@ auto part1(const T& input)
 template <typename T>
 auto part2(T& input)
 {
-    size_t errors = 0;
-    vector<string> valid;
+    vector<size_t> scores;
 
     for (auto line: input)
     {
-        size_t pos = 0;
-        size_t err = 0;
-        validate(line, pos, err, ' ');
-        if (err == 0)
-            valid.push_back(line);
-    }
-
-    vector<size_t> scores;
-    for (auto line: valid)
-    {
-        size_t pos = 0;
-        size_t err = 0;
-        complete(line, pos, err, ' ');
-        scores.push_back(err);
+        size_t score;
+        if (validate2(line, score) == 0)
+            scores.push_back(score);
     }
 
     sort(scores.begin(), scores.end());
