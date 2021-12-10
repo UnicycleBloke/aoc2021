@@ -24,6 +24,7 @@ void validate(const string& line, size_t& pos, size_t& err, char exp)
 }
 
 
+// Alternative stack-based solution. Better than recursion.
 size_t validate(const string& line)
 {
     stack<char> s;
@@ -31,10 +32,10 @@ size_t validate(const string& line)
     {
         switch (c)
         {
-            case ')': if (s.top() != '<') { return 3; }     s.pop(); 
-            case ']': if (s.top() != '<') { return 57; }    s.pop();
-            case '}': if (s.top() != '<') { return 1197; }  s.pop();
-            case '>': if (s.top() != '<') { return 25137; } s.pop();
+            case ')': if (s.top() != '(') { return 3; }     s.pop(); break;
+            case ']': if (s.top() != '[') { return 57; }    s.pop(); break;
+            case '}': if (s.top() != '{') { return 1197; }  s.pop(); break;
+            case '>': if (s.top() != '<') { return 25137; } s.pop(); break;
 
             case '(': 
             case '[': 
@@ -42,6 +43,8 @@ size_t validate(const string& line)
             case '<': s.push(c); break;                
         }
     }
+
+    return 0;
 }
 
 
