@@ -113,7 +113,7 @@ void run(const char* filename)
     auto input = aoc::read_lines(filename, false);
 
     auto temp  = aoc::split(input[0], ",", false);
-    auto calls = aoc::comprehend(temp, [](auto){return true;}, [](auto s){return stoi(s);});
+    auto calls = aoc::comprehend(temp, [](auto s){return stoi(s);});
 
     vector<Board> boards;
     int i = 1;

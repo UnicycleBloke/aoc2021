@@ -1,7 +1,4 @@
 #include "utils.h"
-#ifdef __unix__
-#include "/usr/include/ncurses.h"
-#endif
 
 
 // Original part 1
@@ -61,44 +58,23 @@
 
 
 // Alternative stack-based solution. Better than recursion.
-size_t validate2(const string& line, size_t& score)
+size_t validate(const string& line, size_t& score)
 {
-    int pos = 0;
-    vector<char> chars;
-
     stack<char> s;
     for (char c: line)
     {
         switch (c)
         {
-            case ')': if (s.top() != '(') { return 3; }     s.pop(); chars.pop_back(); break;
-            case ']': if (s.top() != '[') { return 57; }    s.pop(); chars.pop_back(); break;
-            case '}': if (s.top() != '{') { return 1197; }  s.pop(); chars.pop_back(); break;
-            case '>': if (s.top() != '<') { return 25137; } s.pop(); chars.pop_back(); break;
+            case ')': if (s.top() != '(') { return 3; }     s.pop(); break;
+            case ']': if (s.top() != '[') { return 57; }    s.pop(); break;
+            case '}': if (s.top() != '{') { return 1197; }  s.pop(); break;
+            case '>': if (s.top() != '<') { return 25137; } s.pop(); break;
 
             case '(':
             case '[':
             case '{':
-            case '<': s.push(c); chars.push_back(c); break;
+            case '<': s.push(c); break;
         }
-
-        for (auto i: aoc::range<int>(chars.size()))
-        {
-            int colour = 1;
-            switch (chars[i])
-            {
-                case '(': colour = 1; break;
-                case '[': colour = 2; break;
-                case '{': colour = 3; break;
-                case '<': colour = 4; break;
-            }
-            attron(COLOR_PAIR(colour));
-            mvaddch(i, pos, chars[i]);
-            attroff(COLOR_PAIR(colour));
-        }
-        refresh();
-        //getch();
-        ++pos;
     }
 
     score = 0;
@@ -111,27 +87,7 @@ size_t validate2(const string& line, size_t& score)
             case '{': score = score * 5 + 3; break;
             case '<': score = score * 5 + 4; break;
         }
-
         s.pop();
-
-        chars.pop_back();
-        for (auto i: aoc::range<int>(chars.size()))
-        {
-            int colour = 1;
-            switch (chars[i])
-            {
-                case '(': colour = 1; break;
-                case '[': colour = 2; break;
-                case '{': colour = 3; break;
-                case '<': colour = 4; break;
-            }
-            attron(COLOR_PAIR(colour));
-            mvaddch(i, pos, chars[i]);
-            attroff(COLOR_PAIR(colour));
-        }
-        refresh();
-        //getch();
-        ++pos;
     }
 
     return 0;
@@ -145,22 +101,9 @@ auto part1(const T& input)
 
     for (auto line: input)
     {
-        clear();
-
-        char buffer[128];
-        snprintf(buffer, 128, "Total: %u", errors);
-        mvaddstr(22, 0, buffer);
-        refresh();
-
         size_t dummy;
-        auto error = validate2(line, dummy);
+        auto error = validate(line, dummy);
         errors += error;
-
-        snprintf(buffer, 128, "Total: %u", errors);
-        mvaddstr(22, 0, buffer);
-        refresh();
-
-        getch();
     }
 
     return errors;
@@ -175,7 +118,7 @@ auto part2(T& input)
     for (auto line: input)
     {
         size_t score;
-        if (validate2(line, score) == 0)
+        if (validate(line, score) == 0)
             scores.push_back(score);
     }
 
@@ -184,7 +127,7 @@ auto part2(T& input)
 }
 
 
-void run_impl(const char* filename)
+void run(const char* filename)
 {
     auto input = aoc::read_lines(filename);
 
@@ -195,27 +138,6 @@ void run_impl(const char* filename)
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
     aoc::check_result(p2, 3654963618U);
-}
-
-
-void run(const char* filename)
-{
-#ifdef __unix__
-    initscr();
-    cbreak();
-    noecho();
-    start_color();
-    init_pair(1, COLOR_RED,     COLOR_RED);
-    init_pair(2, COLOR_BLUE,    COLOR_BLUE);
-    init_pair(3, COLOR_GREEN,   COLOR_GREEN);
-    init_pair(4, COLOR_MAGENTA, COLOR_MAGENTA);
-#endif
-
-    run_impl(filename);
-
-#ifdef __unix__
-    endwin();
-#endif
 }
 
 

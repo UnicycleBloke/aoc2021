@@ -180,12 +180,37 @@ void check_result(T value, U expected)
 }
 
 
-// Simple equivalent to Python: [trans(x) for x in src if pred(x)].
-template <typename Src, typename Pred, typename Trans>
-auto comprehend(const Src src, const Pred pred, const Trans trans)
+// Used for a default predicate below
+template <typename T>
+struct AlwaysTrue
 {
-    static_assert(is_same_v<Src, vector<typename Src::value_type>>);
+    bool operator()(T) const { return true; }
+};
 
+
+// Used for a default transform below
+template <typename T>
+struct NullTransform
+{
+    T operator()(T t) const { return t; }
+};
+
+
+// Simple equivalent to Python: [trans(x) for x in src if pred(x)].
+//    std::string s = "a234234dfadfkjasdfkjadfjl;akdf";
+//    // Effectively [x for x in s].
+//    auto x = comprehend(s);  
+//    // Effectively [trans(x) for x in s].
+//    auto x = comprehend(s, [](auto c) -> std::size_t { return c; });  
+//    // Effectively [trans(x) for x in s if pred(x)].
+//    auto x = comprehend(s, [](auto c) -> std::size_t { return c; }, [](auto c) { return c % 10 == 7; });  
+template <typename Src, 
+    typename Trans = NullTransform<typename Src::value_type>, 
+    typename Pred = AlwaysTrue<typename Src::value_type>>
+auto comprehend(const Src src, 
+    const Trans trans = NullTransform<typename Src::value_type>{}, 
+    const Pred pred = AlwaysTrue<typename Src::value_type>{})
+{
     std::vector<decltype(trans(src[0]))> dest;
     for (const auto& value: src)
     {
