@@ -17,7 +17,7 @@ class range
         {
         }
 
-        range(U to)
+        range(T to)
         : range{T{}, to}
         {
         }
