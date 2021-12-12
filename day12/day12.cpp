@@ -1,124 +1,47 @@
 #include "utils.h"
 
 
-using Map = map<string, vector<string>>;
-
-
-void search(Map& paths, string curr, int& count, vector<string>& path, string twice)
+struct Node
 {
-    if (curr == "end")
+    string        name{};
+    vector<Node*> caves{};
+    int           count{};
+};
+
+
+void search(Node* curr, Node* twice, int& part1, int& part2)
+{
+    if (curr->name == "end")
     {
-        ++count;
+        if (!twice)
+            ++part1;
+        ++part2;
         return;
     }
 
-    const auto& caves = paths[curr];
-    for (const auto& cave: caves)
+    for (auto cave: curr->caves)
     {
-        if (cave == "start")
+        if (cave->name == "start")
             continue;
 
-        auto twice2 = twice;
-        // Is this a small cave?
-        if ((cave[0] >= 'a') && (cave[0] <= 'z'))
+        if (islower(cave->name[0]))
         {
-            // Is the cave already on our path?
-            if (find(path.begin(), path.end(), cave) != path.end())
+            if (cave->count > 0)
             {
-                // Have we already visited a small cave twice
-                if (twice != "Part2")
-                    continue;
-                twice2 = cave;
-            }
-        }
-
-        path.push_back(cave);        
-        search(paths, cave, count, path, twice2);
-        path.pop_back();        
-    }
-}
-
-
-// Alternative without recursion - based on u/Biggergig's solution
-auto search2(Map& paths)
-{
-    aoc::timer timer;
-
-    int result1{}, result2{};
-
-    using Node = tuple<string, set<string>, bool>;
-
-    queue<Node> nodes;
-    nodes.push(make_tuple("start", set<string>{"start"}, false));
-
-    while (!nodes.empty())
-    {
-        auto [cave, small, seen] = nodes.front();
-        nodes.pop();
-
-        if (cave == "end")
-        {
-            if (!seen)
-                ++result1;
-            ++result2;
-        }
-        else
-        {
-            for (auto& cave2: paths[cave])
-            {
-                // Is this a large cave?
-                if (!islower(cave2[0]))
-                {
-                    // Yes - visit this cave
-                    nodes.push({cave2, small, seen});
-                }
+                if (!twice)
+                    twice = cave;
                 else
-                {
-                    // It's a small cave
-                    // Have we seen it already?
-                    if (small.find(cave2) == small.end())
-                    {
-                        // No - visit this cave
-                        auto small2 = small;
-                        small2.insert(cave2);
-                        nodes.push({cave2, small2, seen});
-                    }
-                    else
-                    {
-                        // Yes - visit this cave if we haven't visited any small cave twice
-                        if (!seen)
-                            nodes.push({cave2, small, true});
-                    }
-                }
-            }
-        }        
+                    continue;
+            } 
+        }
+
+        ++cave->count;   
+        search(cave, twice, part1, part2);
+        --cave->count;
+
+        if (twice == cave)
+            twice = nullptr;   
     }
-
-    return pair{result1, result2};
-}
-
-
-template <typename T>
-auto part1(T paths)
-{ 
-    aoc::timer timer;
-
-    int count = 0;   
-    vector<string> path{"start"};
-    search(paths, "start", count, path, "Part1");
-    return count;
-}
-
-
-template <typename T>
-auto part2(T paths)
-{
-    aoc::timer timer;
-
-    int count = 0;   
-    vector<string> path{"start"};
-    search(paths, "start", count, path, "Part2");
-    return count;
 }
 
 
@@ -126,30 +49,26 @@ void run(const char* filename)
 {
     auto lines = aoc::read_lines<string, string>(filename, R"((\w+)-(\w+))");
 
-    Map input;
+    map<string, Node*> input;
     for (auto [from, to]: lines)
     {
-        if (input.find(from) == input.end()) input[from] = vector<string>{};
-        if (input.find(to)   == input.end()) input[to]   = vector<string>{};
+        // Very naughty - couldn't be asked fighting with the compiler over smart pointers.
+        if (input.find(from) == input.end()) input[from] = new Node{from};
+        if (input.find(to)   == input.end()) input[to]   = new Node{to};
         
         // Redundant
-        if (to != "start")   input[from].push_back(to);
-        if (from != "start") input[to].push_back(from);
+        input[from]->caves.push_back(input[to]);
+        input[to]->caves.push_back(input[from]);
     }
 
-    auto p1 = part1(input);
+    aoc::timer timer;
+
+    int p1{}, p2{};
+    search(input["start"], nullptr, p1, p2);
     cout << "Part1: " << p1 << '\n';
     aoc::check_result(p1, 3410);
-
-    auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
     aoc::check_result(p2, 98796);
-
-    auto [q1, q2] = search2(input);
-    cout << "Part1: " << q1 << '\n';
-    aoc::check_result(q1, 3410);
-    cout << "Part2: " << q2 << '\n';
-    aoc::check_result(q2, 98796);
 }
 
 

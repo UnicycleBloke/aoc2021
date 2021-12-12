@@ -241,7 +241,7 @@ public:
     {
         auto end = cr::steady_clock::now();
         cr::duration<double> diff = end - m_start;
-        std::cout << "Time elapsed: " << diff.count() << '\n';
+        std::cout << "Time elapsed: " << (diff.count() * 1000) << "ms\n";
     }
 
 private:
