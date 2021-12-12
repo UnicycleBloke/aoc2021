@@ -1,29 +1,7 @@
 #include "utils.h"
-#include <chrono>
 
 
 using Map = map<string, vector<string>>;
-
-
-namespace cron = std::chrono;
-class Timer
-{
-
-public:
-    Timer()
-    : start{cron::steady_clock::now()}
-    {
-    }
-    ~Timer()
-    {
-        auto end = cron::steady_clock::now();
-        cron::duration<double> diff = end - start;
-        std::cout << "Time elapsed: " << diff.count() << '\n';
-    }
-
-private:
-    cron::time_point<cron::steady_clock> start{}; 
-};
 
 
 void search(Map& paths, string curr, int& count, vector<string>& path, string twice)
@@ -64,7 +42,7 @@ void search(Map& paths, string curr, int& count, vector<string>& path, string tw
 // Alternative without recursion - based on u/Biggergig's solution
 auto search2(Map& paths)
 {
-    Timer timer;
+    aoc::timer timer;
 
     int result1{}, result2{};
 
@@ -123,7 +101,7 @@ auto search2(Map& paths)
 template <typename T>
 auto part1(T paths)
 { 
-    Timer timer;
+    aoc::timer timer;
 
     int count = 0;   
     vector<string> path{"start"};
@@ -135,9 +113,9 @@ auto part1(T paths)
 template <typename T>
 auto part2(T paths)
 {
-    Timer timer;
-    int count = 0;   
+    aoc::timer timer;
 
+    int count = 0;   
     vector<string> path{"start"};
     search(paths, "start", count, path, "Part2");
     return count;

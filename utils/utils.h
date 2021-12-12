@@ -25,6 +25,7 @@
 
 using namespace std;
 namespace fs = std::filesystem;
+namespace cr = std::chrono;
 
 
 namespace aoc {
@@ -226,6 +227,26 @@ int sgn(T val)
 {
     return (T(0) < val) - (val < T(0));
 }
+
+
+class timer
+{
+public:
+    timer()
+    : m_start{cr::steady_clock::now()}
+    {
+    }
+    
+    ~timer()
+    {
+        auto end = cr::steady_clock::now();
+        cr::duration<double> diff = end - m_start;
+        std::cout << "Time elapsed: " << diff.count() << '\n';
+    }
+
+private:
+    cr::time_point<cr::steady_clock> m_start{}; 
+};
 
 
 } // namespace aoc {
