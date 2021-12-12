@@ -61,7 +61,7 @@ void search(Map& paths, string curr, int& count, vector<string>& path, string tw
 }
 
 
-// Alternative without recursion
+// Alternative without recursion - based on u/Biggergig's solution
 auto search2(Map& paths)
 {
     Timer timer;
