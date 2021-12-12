@@ -1,122 +1,82 @@
 #include "utils.h"
 
 
-template <typename T>
-void print(const T& grid)
+using Map = map<string, vector<string>>;
+
+
+void search(Map& paths, string curr, int& count, vector<string> path, string twice)
 {
-    for (auto i: aoc::range(1, 11, 1))
+    if (curr == "end")
     {
-        for (auto j: aoc::range(1, 11, 1))
-        {
-            cout << char('0' + grid[i][j]);
-        }
-        cout << '\n';
+        ++count;
+        return;
     }
-    cout << '\n';
-}
 
-
-template <typename T>
-int step(T& grid)
-{
-    int flashes = 0;
-
-    // Increment all octopoodles
-    for (auto i: aoc::range(1, 11, 1))
-        for (auto j: aoc::range(1, 11, 1))
-            ++grid[i][j];
-
-    // The tricksy bit
-    // Copy so flashes don't interfere with each other. Much time 
-    // lost to this one...
-    T grid2 = grid;
-    while (true)
+    const auto& caves = paths[curr];
+    for (const auto& cave: caves)
     {
-        int flashes2 = 0;
-        for (auto i: aoc::range(1, 11, 1))
+        if (cave == "start")
+            continue;
+
+        auto twice2 = twice;
+        // Is this a small cave?
+        if ((cave[0] >= 'a') && (cave[0] <= 'z'))
         {
-            for (auto j: aoc::range(1, 11, 1))
+            // Is the cave already on our path?
+            if (find(path.begin(), path.end(), cave) != path.end())
             {
-                if ((grid[i][j] > 9) && (grid[i][j] < 100))
-                {
-                    ++flashes2;
-
-                    ++grid2[i+1][j+1];
-                    ++grid2[i+1][j];
-                    ++grid2[i+1][j-1];
-
-                    ++grid2[i][j+1];
-                      grid2[i][j] = 100; // Mark as already flashed
-                    ++grid2[i][j-1];
-
-                    ++grid2[i-1][j+1];
-                    ++grid2[i-1][j];
-                    ++grid2[i-1][j-1];
-                }
+                // Have we already visited a small cave twice
+                if (twice != "Part2")
+                    continue;
+                twice2 = cave;
             }
-
-            grid = grid2;
         }
 
-        flashes += flashes2;
-        if (flashes2 == 0) break;
+        auto path2 = path;
+        path2.push_back(cave);        
+        search(paths, cave, count, path2, twice2);
     }
-
-    // Restore flashed octopoddlings  
-    for (auto i: aoc::range(1, 11, 1))
-        for (auto j: aoc::range(1, 11, 1))
-            if (grid[i][j] > 9) grid[i][j] = 0;
-
-    return flashes;
 }
 
 
 template <typename T>
-auto part1(T grid)
-{
-    int flashes = 0;
-    for (auto s: aoc::range(0, 100, 1))
-    {
-        int count = step(grid);
-        //cout << s << ' '<< count << '\n';
-        //print(grid);
-        flashes += count;
-    }
-    return flashes;
+auto part1(T paths)
+{ 
+    int count = 0;   
+    search(paths, "start", count, vector<string>{"start"}, "Part1");
+    return count;
 }
 
 
 template <typename T>
-auto part2(T grid)
+auto part2(T paths)
 {
-    int s = 1;
-    while (true)
-    {
-        int count = step(grid);
-        //cout << s << ' '<< count << '\n';
-        //print(grid);
-        if (count == 100) return s;
-        ++s;
-    }
+    int count = 0;   
+    search(paths, "start", count, vector<string>{"start"}, "Part2");
+    return count;
 }
 
 
 void run(const char* filename)
 {
-    auto lines = aoc::read_lines(filename);
+    auto lines = aoc::read_lines<string, string>(filename, R"((\w+)-(\w+))");
 
-    array<array<int, 12>, 12> input{};
-    for (auto i: aoc::range(1, 11, 1))
-        for (auto j: aoc::range(1, 11, 1))
-            input[i][j] = lines[i-1][j-1] - '0';
+    Map input;
+    for (auto [from, to]: lines)
+    {
+        if (input.find(from) == input.end()) input[from] = vector<string>{};
+        if (input.find(to)   == input.end()) input[to]   = vector<string>{};
+        input[from].push_back(to);
+        input[to].push_back(from);
+    }
 
     auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 1681);
+    aoc::check_result(p1, 3410);
 
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 276);
+    aoc::check_result(p2, 98796);
 }
 
 
