@@ -4,7 +4,7 @@
 using Map = map<string, vector<string>>;
 
 
-void search(Map& paths, string curr, int& count, vector<string> path, string twice)
+void search(Map& paths, string curr, int& count, vector<string>& path, string twice)
 {
     if (curr == "end")
     {
@@ -32,9 +32,9 @@ void search(Map& paths, string curr, int& count, vector<string> path, string twi
             }
         }
 
-        auto path2 = path;
-        path2.push_back(cave);        
-        search(paths, cave, count, path2, twice2);
+        path.push_back(cave);        
+        search(paths, cave, count, path, twice2);
+        path.pop_back();        
     }
 }
 
