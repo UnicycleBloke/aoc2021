@@ -1,7 +1,29 @@
 #include "utils.h"
+#include <chrono>
 
 
 using Map = map<string, vector<string>>;
+
+
+namespace cron = std::chrono;
+class Timer
+{
+
+public:
+    Timer()
+    : start{cron::steady_clock::now()}
+    {
+    }
+    ~Timer()
+    {
+        auto end = cron::steady_clock::now();
+        cron::duration<double> diff = end - start;
+        std::cout << "Time elapsed: " << diff.count() << '\n';
+    }
+
+private:
+    cron::time_point<cron::steady_clock> start{}; 
+};
 
 
 void search(Map& paths, string curr, int& count, vector<string>& path, string twice)
@@ -39,11 +61,73 @@ void search(Map& paths, string curr, int& count, vector<string>& path, string tw
 }
 
 
+// Alternative without recursion
+auto search2(Map& paths)
+{
+    Timer timer;
+
+    int result1{}, result2{};
+
+    using Node = tuple<string, set<string>, bool>;
+
+    queue<Node> nodes;
+    nodes.push(make_tuple("start", set<string>{"start"}, false));
+
+    while (!nodes.empty())
+    {
+        auto [cave, small, seen] = nodes.front();
+        nodes.pop();
+
+        if (cave == "end")
+        {
+            if (!seen)
+                ++result1;
+            ++result2;
+        }
+        else
+        {
+            for (auto& cave2: paths[cave])
+            {
+                // Is this a large cave?
+                if (!islower(cave2[0]))
+                {
+                    // Yes - visit this cave
+                    nodes.push({cave2, small, seen});
+                }
+                else
+                {
+                    // It's a small cave
+                    // Have we seen it already?
+                    if (small.find(cave2) == small.end())
+                    {
+                        // No - visit this cave
+                        auto small2 = small;
+                        small2.insert(cave2);
+                        nodes.push({cave2, small2, seen});
+                    }
+                    else
+                    {
+                        // Yes - visit this cave if we haven't visited any small cave twice
+                        if (!seen)
+                            nodes.push({cave2, small, true});
+                    }
+                }
+            }
+        }        
+    }
+
+    return pair{result1, result2};
+}
+
+
 template <typename T>
 auto part1(T paths)
 { 
+    Timer timer;
+
     int count = 0;   
-    search(paths, "start", count, vector<string>{"start"}, "Part1");
+    vector<string> path{"start"};
+    search(paths, "start", count, path, "Part1");
     return count;
 }
 
@@ -51,8 +135,11 @@ auto part1(T paths)
 template <typename T>
 auto part2(T paths)
 {
+    Timer timer;
     int count = 0;   
-    search(paths, "start", count, vector<string>{"start"}, "Part2");
+
+    vector<string> path{"start"};
+    search(paths, "start", count, path, "Part2");
     return count;
 }
 
@@ -66,8 +153,10 @@ void run(const char* filename)
     {
         if (input.find(from) == input.end()) input[from] = vector<string>{};
         if (input.find(to)   == input.end()) input[to]   = vector<string>{};
-        input[from].push_back(to);
-        input[to].push_back(from);
+        
+        // Redundant
+        if (to != "start")   input[from].push_back(to);
+        if (from != "start") input[to].push_back(from);
     }
 
     auto p1 = part1(input);
@@ -77,6 +166,12 @@ void run(const char* filename)
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
     aoc::check_result(p2, 98796);
+
+    auto [q1, q2] = search2(input);
+    cout << "Part1: " << q1 << '\n';
+    aoc::check_result(q1, 3410);
+    cout << "Part2: " << q2 << '\n';
+    aoc::check_result(q2, 98796);
 }
 
 
