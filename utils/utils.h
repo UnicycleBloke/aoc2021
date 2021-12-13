@@ -106,13 +106,15 @@ std::vector<T> read_ints(std::istream& is)
 // \w     word: an alphanumeric or underscore character (same as [_[:alnum:]]).
 // \W     not word
 template <class... Args>
-std::tuple<Args...> parse_line(const std::regex& re, const std::string& str)
+std::tuple<Args...> parse_line(const std::regex& re, const std::string& str, bool& matched)
 {
     // Capture values from a string using regex, and stuff these
     // into a new space-delimited string.
     std::smatch matches;
     std::stringstream ss{};
-    if (std::regex_match(str, matches, re))
+
+    matched = std::regex_match(str, matches, re);
+    if (matched)
     {
         for (int i = 1; i < matches.size(); ++i)
         {
@@ -152,7 +154,10 @@ std::vector<std::tuple<Args...>> read_lines(std::istream& is, std::string pat)
     auto lines = read_lines(is, false);
     for (const auto& line: lines)
     {
-        result.push_back(parse_line<Args...>(re, line));
+        bool matched = false;
+        auto temp    = parse_line<Args...>(re, line, matched);
+        if (matched)
+            result.push_back(temp);
     }
 
     return result;
@@ -241,7 +246,7 @@ public:
     {
         auto end = cr::steady_clock::now();
         cr::duration<double> diff = end - m_start;
-        std::cout << "Time elapsed: " << diff.count() << '\n';
+        std::cout << "Time elapsed: " << (diff.count() * 1000) << "ms\n";
     }
 
 private:

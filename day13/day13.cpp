@@ -2,39 +2,99 @@
 
 
 template <typename T>
-auto part1(T paths)
-{ 
-    aoc::timer timer;
-    return 0;
+auto render(T points)
+{
+    int xmax = 0;
+    int ymax = 0;
+    for (auto& [x, y]: points)
+    {
+        xmax = max(x, xmax);
+        ymax = max(y, ymax);
+    }
+    ++xmax;
+    ++ymax;
+
+    vector<int> row(xmax, 0);
+    vector<vector<int>> grid(ymax, row);
+    for (auto& [x, y]: points)
+        grid[y][x] = 1;
+
+    cout << '\n';
+    for (const auto& r: grid)
+    {
+        for (const auto& c: r)
+            cout << ((c == 1) ? '#' : ' '); // More readable               
+            //cout << ((c == 1) ? '#' : '.');                
+        cout << '\n';
+    }                
+    cout << '\n';
 }
 
 
-template <typename T>
-auto part2(T paths)
+template <typename T, typename U>
+auto fold(T& points, U& folds, bool once)
+{ 
+    for (auto [dir, off]: folds)
+    {
+        for (auto& [x, y]: points)
+        {                
+            // Got my x and y confused somewhere in the input. No matter.
+            if (dir == 'x')
+                if (x > off) x = off - abs(x - off);       
+            if (dir == 'y')
+                if (y > off) y = off - abs(y - off);       
+        }
+
+        if (once) 
+            break;
+    }
+
+    if (!once) 
+        render(points);
+
+    map<typename T::value_type, int> visible;
+    for (auto& [x, y]: points) 
+        visible[{x, y}] = 1;
+
+    return visible.size();
+}
+
+
+template <typename T, typename U>
+auto part1(T points, U folds)
 {
     aoc::timer timer;
-    return 0;
+    return fold(points, folds, true);
+}
+
+
+template <typename T, typename U>
+auto part2(T points, U folds)
+{
+    aoc::timer timer;
+    return fold(points, folds, false);
 }
 
 
 void run(const char* filename)
 {
-    auto input = aoc::read_lines<string, string>(filename, R"((\w+)-(\w+))");
+    aoc::timer timer;
 
-    auto p1 = part1(input);
+    auto points = aoc::read_lines<int, int>(filename, R"((\d+),(\d+))");
+    auto folds  = aoc::read_lines<char, int>(filename, R"(fold\salong\s(\w)=(\d+))");
+
+    auto p1 = part1(points, folds);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 3410);
+    aoc::check_result(p1, 785U);
 
-    auto p2 = part2(input);
-    cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 98796);
+    auto p2 = part2(points, folds);
+    cout << "Part2: is read off the screen\n";
 }
 
 
 int main(int argc, char** argv)
 {
     aoc::timer timer;
-    
     try
     {
         if (argc < 2)
