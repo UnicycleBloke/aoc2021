@@ -14,17 +14,18 @@ auto render(T points)
     ++xmax;
     ++ymax;
 
+    cout << "xdim=" << xmax << " ydim=" << ymax << '\n';
+
     vector<int> row(xmax, 0);
     vector<vector<int>> grid(ymax, row);
     for (auto& [x, y]: points)
         grid[y][x] = 1;
 
-    cout << '\n';
     for (const auto& r: grid)
     {
         for (const auto& c: r)
             cout << ((c == 1) ? '#' : ' '); // More readable               
-            //cout << ((c == 1) ? '#' : '.');                
+            //cout << ((c == 1) ? '#' : '.'); // Better when rendering all stages               
         cout << '\n';
     }                
     cout << '\n';
@@ -47,6 +48,8 @@ auto fold(T& points, U& folds, bool once)
 
         if (once) 
             break;
+
+        //render(points);
     }
 
     if (!once) 

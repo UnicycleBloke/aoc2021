@@ -2,12 +2,74 @@
 
 
 using Map = map<string, vector<string>>;
+map<string, int> trav;
+map<string, int> visits;
+
+void render(Map& input, bool override = false)
+{
+    static int counter   =   1;
+    static int increment =   1;
+    static int frames    = 300;
+    static int index     =   0;
+
+    if ((--counter == 0) || override)
+    {
+        counter = increment;
+        if (--frames == 0)
+        {
+            frames = 60;
+            if (increment < 40)
+                    ++increment;
+        } 
+
+        char filename[32];
+        snprintf(filename, 32, "dot/day12-%06d.dot", index++);
+        ofstream os{filename};
+        os << "digraph Day12 {\n";
+
+        for (const auto& [cave, count]: visits)
+        {
+            os << cave << " [";
+            os << "label=\"" << cave << "\n" << count << "\"";
+            os << ", fontsize=25";
+            string colour = "blue";
+            if (islower(cave[0])) colour = "red";
+            if (cave == "start")  colour = "black";
+            if (cave == "end")    colour = "black";
+            os << ", color=" << colour;
+            os << ", fontcolor=" << colour;
+            os << "]"<< '\n';
+        }
+
+        for (const auto& [from, caves]: input)
+        {
+            for (const auto& to: caves)
+            {
+                if (from == "end") continue;
+                if (to == "start") continue;
+
+                os << from << " -> " << to;
+                os << " [";
+                os << "label=\"" << trav[from+to] << "\"";
+                os << ", fontsize=20";
+                os << "]"<< '\n';
+            }
+        }
+        os << "}\n";
+    }
+}
 
 
 void search(Map& paths, string curr, int& count, vector<string>& path, string twice)
 {
     if (curr == "end")
     {
+        for (auto i: aoc::range(0U, path.size() - 1))
+            ++trav[path[i]+path[i+1]];
+        for (auto s: path)
+            ++visits[s];
+        render(paths);    
+
         ++count;
         return;
     }
@@ -106,6 +168,7 @@ auto part1(T paths)
     int count = 0;   
     vector<string> path{"start"};
     search(paths, "start", count, path, "Part1");
+    render(paths, true);       
     return count;
 }
 
@@ -118,6 +181,7 @@ auto part2(T paths)
     int count = 0;   
     vector<string> path{"start"};
     search(paths, "start", count, path, "Part2");
+    render(paths, true);    
     return count;
 }
 
@@ -135,21 +199,25 @@ void run(const char* filename)
         // Redundant
         if (to != "start")   input[from].push_back(to);
         if (from != "start") input[to].push_back(from);
+
+        trav[from+to] = 0;
+        visits[from]  = 0;
+        visits[to]    = 0;
     }
 
-    auto p1 = part1(input);
-    cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 3410);
+    // auto p1 = part1(input);
+    // cout << "Part1: " << p1 << '\n';
+    // aoc::check_result(p1, 3410);
 
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
     aoc::check_result(p2, 98796);
 
-    auto [q1, q2] = search2(input);
-    cout << "Part1: " << q1 << '\n';
-    aoc::check_result(q1, 3410);
-    cout << "Part2: " << q2 << '\n';
-    aoc::check_result(q2, 98796);
+    // auto [q1, q2] = search2(input);
+    // cout << "Part1: " << q1 << '\n';
+    // aoc::check_result(q1, 3410);
+    // cout << "Part2: " << q2 << '\n';
+    // aoc::check_result(q2, 98796);
 }
 
 

@@ -139,8 +139,9 @@ std::tuple<Args...> parse_line(const std::regex& re, const std::string& str, boo
 template <class... Args>
 std::tuple<Args...> parse_line(const std::string& pat, const std::string& str)
 {
+    bool dummy;
     const std::regex re(pat);
-    return parse_line<Args...>(re, str);
+    return parse_line<Args...>(re, str, dummy);
 }
 
 
@@ -154,6 +155,8 @@ std::vector<std::tuple<Args...>> read_lines(std::istream& is, std::string pat)
     auto lines = read_lines(is, false);
     for (const auto& line: lines)
     {
+        // Skip lines which don't match - useful for reading files with two or 
+        // more lines formats. Call read_lines for each format.
         bool matched = false;
         auto temp    = parse_line<Args...>(re, line, matched);
         if (matched)
