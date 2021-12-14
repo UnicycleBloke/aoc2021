@@ -4,8 +4,8 @@
 template <typename T>
 auto render(T points)
 {
-    int xmax = 0;
-    int ymax = 0;
+    uint64_t xmax = 0;
+    uint64_t ymax = 0;
     for (auto& [x, y]: points)
     {
         xmax = max(x, xmax);
@@ -41,9 +41,9 @@ auto fold(T& points, U& folds, bool once)
         {                
             // Got my x and y confused somewhere in the input. No matter.
             if (dir == 'x')
-                if (x > off) x = off - abs(x - off);       
+                if (x > off) x = off - (x - off);       
             if (dir == 'y')
-                if (y > off) y = off - abs(y - off);       
+                if (y > off) y = off - (y - off);       
         }
 
         if (once) 
@@ -83,8 +83,8 @@ void run(const char* filename)
 {
     aoc::timer timer;
 
-    auto points = aoc::read_lines<int, int>(filename, R"((\d+),(\d+))");
-    auto folds  = aoc::read_lines<char, int>(filename, R"(fold\salong\s(\w)=(\d+))");
+    auto points = aoc::read_lines<uint64_t, uint64_t>(filename, R"((\d+),(\d+))");
+    auto folds  = aoc::read_lines<char, uint64_t>(filename, R"(fold\salong\s(\w)=(\d+))");
 
     auto p1 = part1(points, folds);
     cout << "Part1: " << p1 << '\n';

@@ -1,50 +1,68 @@
 #include "utils.h"
 
 
-template <typename T>
-auto render(T points)
+using Pair  = pair<char, char>; 
+using State = map<Pair, uint64_t>;
+using Rules = map<Pair, pair<Pair, Pair>>;
+
+
+auto grow(State src, Rules& rules)
 {
-    int xmax = 0;
-    int ymax = 0;
-    for (auto& [x, y]: points)
+    State dst;
+
+    for (auto [k, v]: src)
     {
-        xmax = max(x, xmax);
-        ymax = max(y, ymax);
+        auto rule = rules[k];
+        auto A = rule.first;
+        auto B = rule.second;
+
+        if (dst.find(A) == dst.end()) dst[A] = 0;
+        if (dst.find(B) == dst.end()) dst[B] = 0;
+
+        dst[A] += v;
+        dst[B] += v;
     }
-    ++xmax;
-    ++ymax;
 
-    cout << "xdim=" << xmax << " ydim=" << ymax << '\n';
+    return dst;
+}
 
-    vector<int> row(xmax, 0);
-    vector<vector<int>> grid(ymax, row);
-    for (auto& [x, y]: points)
-        grid[y][x] = 1;
 
-    for (const auto& r: grid)
+auto solve(State init, Pair ends, Rules& rules, int steps)
+{
+    aoc::timer timer;
+
+    uint64_t cmax =  0;
+    uint64_t cmin = -1;
+
+    for (int i: aoc::range(steps))
     {
-        for (const auto& c: r)
-            cout << ((c == 1) ? '#' : ' '); // More readable               
-            //cout << ((c == 1) ? '#' : '.'); // Better when rendering all stages               
-        cout << '\n';
-    }                
-    cout << '\n';
-}
+        init = grow(init, rules);
+    }
 
+    map<char, uint64_t> counts;
+    counts[ends.first] = 1;
+    counts[ends.second] = (ends.second == ends.first) ? 2 : 1;
 
-template <typename T, typename U>
-auto part1(T points, U folds)
-{
-    aoc::timer timer;
-    return 0;
-}
+    for (auto [k, v]: init)
+    {
+        auto A = k.first;
+        auto B = k.second;
 
+        if (counts.find(A) == counts.end()) counts[A] = 0;
+        if (counts.find(B) == counts.end()) counts[B] = 0;
 
-template <typename T, typename U>
-auto part2(T points, U folds)
-{
-    aoc::timer timer;
-    return 0;
+        counts[A] += v;
+        counts[B] += v;
+    }
+
+    for (auto [k, v]: counts)
+    {
+        v = v / 2;
+        cmax = max(cmax, v);
+        cmin = min(cmin, v);
+    }
+
+    return cmax - cmin;
 }
 
 
@@ -52,16 +70,39 @@ void run(const char* filename)
 {
     aoc::timer timer;
 
-    auto points = aoc::read_lines<int, int>(filename, R"((\d+),(\d+))");
-    auto folds  = aoc::read_lines<char, int>(filename, R"(fold\salong\s(\w)=(\d+))");
+    auto init = aoc::read_lines(filename)[0];
+    auto input   = aoc::read_lines<char, char, char>(filename, R"((\w)(\w)\s->\s(\w))");
 
-    auto p1 = part1(points, folds);
+    Rules rules;
+    for (auto [a, b, c] : input)
+    {
+        Pair A{a, b};
+        Pair B{a, c};
+        Pair C{c, b};
+        rules[A] = {B, C};
+    }
+
+    State state;
+    for (size_t i: aoc::range(init.size()-1))
+    {
+        auto a = init[i];
+        auto b = init[i+1];
+        Pair A{a, b};
+        if (state.find(A) == state.end()) state[A] = 0;
+        state[A] += 1;
+    }
+
+    // Needed to adjust to totals because the end characters are counted once 
+    // but all the others are counted twice. Result is half the max - min.
+    Pair ends{*init.begin(), *(init.end()-1)};
+
+    auto p1 = solve(state, ends, rules, 10);
     cout << "Part1: " << p1 << '\n';
-    //aoc::check_result(p1, 0);
+    aoc::check_result(p1, 2027U);
 
-    auto p2 = part2(points, folds);
-    cout << "Part2: is read off the screen\n";
-    //aoc::check_result(p2, 0);
+    auto p2 = solve(state, ends, rules, 40);
+    cout << "Part2: " << p2 << '\n';
+    aoc::check_result(p2, 2265039461737U);
 }
 
 
