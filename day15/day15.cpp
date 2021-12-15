@@ -10,10 +10,9 @@ auto dijkstra(T input)
     const uint32_t ROWS = static_cast<uint32_t>(input.size());
 
     using Pos = pair<uint32_t, uint32_t>;
-    set<Pos> unvisited;
-    for (auto r: aoc::range{ROWS})
-        for (auto c: aoc::range{COLS})
-            unvisited.insert({r, c});
+
+    vector<uint32_t> visited_row(COLS, 0); 
+    vector<vector<uint32_t>> visited(ROWS, visited_row);
 
     // This is an optimisation. The algo says to select the node with the 
     // lowest tentative distance to be the next current node. The initial full 
@@ -25,10 +24,12 @@ auto dijkstra(T input)
     constexpr uint32_t HUGE_DISTANCE = 0xFFFF'FFFF;
     vector<uint32_t> distance_row(COLS, HUGE_DISTANCE); 
     vector<vector<uint32_t>> distance(ROWS, distance_row);
+    
     distance[0][0] = 0;
     Pos current = {0, 0};
+    marked.insert(current);
 
-    while (unvisited.size() > 0)
+    while (marked.size() > 0)
     {
         auto [x, y] = current;
 
@@ -42,24 +43,22 @@ auto dijkstra(T input)
         for (auto pos: neighbours)
         {
             // Ignore neighbours already visited
-            if (unvisited.find(pos) == unvisited.end())
+            auto [i, j] = pos;    
+            if (visited[i][j] == 1)
                 continue;
 
             // Maybe reduce the tentative distance
-            auto [i, j] = pos;    
             distance[i][j] = min(distance[i][j], distance[x][y] + input[i][j]);
             marked.insert({i,j});
         }
 
-        unvisited.erase(current);
+        visited[x][y] = 1;
         marked.erase(current);
 
         if (current == Pos{ ROWS-1, COLS-1})
             return distance[ROWS-1][COLS-1];
 
         uint32_t min_distance = HUGE_DISTANCE;
-        // A significant optimisation.
-        //for (auto [x, y]: unvisited)
         for (auto [x, y]: marked)
         {
             if (distance[x][y] < min_distance)
