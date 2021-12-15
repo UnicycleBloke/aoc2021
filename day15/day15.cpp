@@ -2,7 +2,7 @@
 
 
 template <typename T>
-auto part1(T input)
+auto dijkstra(T input)
 {
     aoc::timer timer;
 
@@ -10,31 +10,26 @@ auto part1(T input)
     const uint32_t ROWS = static_cast<uint32_t>(input.size());
 
     using Pos = pair<uint32_t, uint32_t>;
-
-    // 1. Mark all nodes unvisited. Create a set of all the unvisited nodes called the unvisited set.
     set<Pos> unvisited;
     for (auto r: aoc::range{ROWS})
         for (auto c: aoc::range{COLS})
             unvisited.insert({r, c});
 
-    // 2. Assign to every node a tentative distance value: set it to zero for our initial node 
-    // and to infinity for all other nodes. The tentative distance of a node v is the length of 
-    // the shortest path discovered so far between the node v and the starting node. Since initially 
-    // no path is known to any other vertex than the source itself (which is a path of length zero), 
-    // all other tentative distances are initially set to infinity. Set the initial node as current.
-    vector<uint32_t> distance_row(COLS, 0xFFFF'FFFF); // Infinity
+    // This is an optimisation. The algo says to select the node with the 
+    // lowest tentative distance to be the next current node. The initial full 
+    // set of 250,000 nodes makes this very slow. Use this set to hold the nodes
+    // with non-infinite distances but which have not yet been visited - a much 
+    // smaller set.
+    set<Pos> marked;
+
+    constexpr uint32_t HUGE_DISTANCE = 0xFFFF'FFFF;
+    vector<uint32_t> distance_row(COLS, HUGE_DISTANCE); 
     vector<vector<uint32_t>> distance(ROWS, distance_row);
     distance[0][0] = 0;
     Pos current = {0, 0};
 
     while (unvisited.size() > 0)
     {
-        // 3. For the current node, consider all of its unvisited neighbors and calculate their tentative 
-        // distances through the current node. Compare the newly calculated tentative distance to the current 
-        // assigned value and assign the smaller one. For example, if the current node A is marked with a 
-        // distance of 6, and the edge connecting it with a neighbor B has length 2, then the distance to B 
-        // through A will be 6 + 2 = 8. If B was previously marked with a distance greater than 8 then change 
-        // it to 8. Otherwise, the current value will be kept.
         auto [x, y] = current;
 
         // All neighbours
@@ -53,24 +48,19 @@ auto part1(T input)
             // Maybe reduce the tentative distance
             auto [i, j] = pos;    
             distance[i][j] = min(distance[i][j], distance[x][y] + input[i][j]);
+            marked.insert({i,j});
         }
 
-        // 4. When we are done considering all of the unvisited neighbors of the current node, mark the 
-        // current node as visited and remove it from the unvisited set. A visited node will never be 
-        // checked again.
         unvisited.erase(current);
+        marked.erase(current);
 
-        // 5. If the destination node has been marked visited (when planning a route between two specific nodes) 
-        // or if the smallest tentative distance among the nodes in the unvisited set is infinity (when planning 
-        // a complete traversal; occurs when there is no connection between the initial node and remaining unvisited 
-        // nodes), then stop. The algorithm has finished.
         if (current == Pos{ ROWS-1, COLS-1})
             return distance[ROWS-1][COLS-1];
 
-        // 6. Otherwise, select the unvisited node that is marked with the smallest tentative distance, 
-        // set it as the new current node, and go back to step 3.
-        uint32_t min_distance = 0xFFFF'FFFF;
-        for (auto [x, y]: unvisited)
+        uint32_t min_distance = HUGE_DISTANCE;
+        // A significant optimisation.
+        //for (auto [x, y]: unvisited)
+        for (auto [x, y]: marked)
         {
             if (distance[x][y] < min_distance)
             {
@@ -80,7 +70,15 @@ auto part1(T input)
         }
     }
 
-    return 0xFFFF'FFFF;
+    return HUGE_DISTANCE;
+}
+
+
+template <typename T>
+auto part1(T input)
+{
+    aoc::timer timer;
+    return dijkstra(input);
 }
 
 
@@ -88,7 +86,45 @@ template <typename T>
 auto part2(T input)
 {
     aoc::timer timer;
-    return 0;
+
+    const uint32_t COLS = static_cast<uint32_t>(input[0].size());
+    const uint32_t ROWS = static_cast<uint32_t>(input.size());
+
+    vector<uint32_t> large_row(COLS*5, 0);
+    vector<vector<uint32_t>> large(ROWS*5, large_row);
+
+    for (auto r: aoc::range{ROWS})
+        for (auto c: aoc::range{COLS})
+            auto value = input[r][c];
+
+    for (auto r: aoc::range{ROWS})
+    {
+        for (auto c: aoc::range{COLS})
+        {
+            auto orig = input[r][c];
+            auto roff = 0;
+            auto coff = 0;
+
+            for (auto i: aoc::range{0, 5})
+            {
+                auto value = orig;
+                for (auto j: aoc::range{0, 5})
+                {
+                    large[r + roff][c + coff] = value;
+                    value = (value == 9) ? 1 : value + 1;
+                    coff += COLS;
+                }
+
+                coff  = 0;
+                roff += ROWS;
+
+                orig = (orig == 9) ? 1 : orig + 1;
+            }
+        }
+    }
+
+    // This is S--L--O--W (21s) - must be doing something wrong.
+    return dijkstra(large);
 }
 
 
@@ -106,11 +142,11 @@ void run(const char* filename)
 
     auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
-    //aoc::check_result(p1, 0);
+    aoc::check_result(p1, 462U);
 
     auto p2 = part2(input);
-    cout << "Part2: is read off the screen\n";
-    //aoc::check_result(p2, 0);
+    cout << "Part2: " << p2 << '\n';
+    aoc::check_result(p2, 2846U);
 }
 
 
