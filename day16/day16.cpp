@@ -12,47 +12,25 @@ struct Packet
 
     uint32_t total_ver()
     {
-        uint32_t total = version;
-        for (auto& op: operands)
-            total += op.total_ver();
-        return total;
+        return version + accumulate(operands.begin(), operands.end(), 0U, [](auto a, auto b) { return a + b.total_ver(); });
     }
 
     uint64_t value()
     {
-        uint64_t result{};
         switch (type)
         {
-            case 0:
-                result = 0;
-                for (auto& p: operands) 
-                    result += p.value();
-                break;
-
-            case 1: 
-                result = 1;
-                for (auto& p: operands) 
-                    result *= p.value();
-                break;
-
-            case 2: 
-                result = -1;
-                for (auto& p: operands) 
-                    result = min(result, p.value());
-                break;
-
-            case 3:
-                result = 0U;
-                for (auto& p: operands) 
-                    result = max(result, p.value());
-                break;
-
+            // This is cleaner and shorter than the original code, using the algorithms, but likely wastes time re-evaluating sub expressions.
+            // Note that initial value must be uint64 or the return values will lose high bits.
+            case 0: return accumulate(operands.begin(), operands.end(), 0ULL, [](auto a, auto b) { return a + b.value(); });
+            case 1: return accumulate(operands.begin(), operands.end(), 1ULL, [](auto a, auto b) { return a * b.value(); });
+            case 2: return min_element(operands.begin(), operands.end(), [](auto a, auto b) { return a.value() < b.value(); })->value();
+            case 3: return max_element(operands.begin(), operands.end(), [](auto a, auto b) { return a.value() < b.value(); })->value();
             case 5: return operands[0].value() > operands[1].value();
             case 6: return operands[0].value() < operands[1].value();
             case 7: return operands[0].value() == operands[1].value();
             case 4: return literal;
         }
-        return result;
+        return 0U;
     }
 };
 
