@@ -144,6 +144,112 @@ uint8_t from_hex(char c)
 }
 
 
+// I parsed the expression in an AST and then used that to calculated the answers. 
+// Fun but a waste of time. All I really needed to do for Part 1 was this, which 
+// skips everything to add the versions on the fly.
+uint64_t part1(Input& input)
+{
+    uint64_t result = input.take(3);
+    if (input.take(3) != 4)
+    {
+        if (input.take(1) == 0)
+        {
+            auto pos = input.pos + input.take(15);
+            while (input.pos < pos)
+                result += part1(input);
+        }
+        else
+        {
+            for (auto i: aoc::range(input.take(11)))
+                result += part1(input);
+        }
+    }
+    else
+    {
+        while ((input.take(5) & 0b10000) > 0);
+    }
+
+    return result;
+}
+
+
+// As above, no AST was required. Just create vector of subvalues on which to 
+// use the operator. NOTE: This works perfectly for Visual Studio but not GCC
+// under Ubuntu. There is a ton of diagnostic rubbish here, which shows that the 
+// GCC version has several places in which the operations are out of order. For 
+// example it will try to find the minimum value of a subexpression before reading
+// the literal value which goes in the subexpression. So it operates on an empty 
+// vector (boom) or one without all the expected values in it. It is deterministic, 
+// but I have not been able to work out what's going on.
+uint64_t part2(Input& input)
+{
+    uint16_t ver  = input.take(3);
+    uint16_t type = input.take(3);
+    cout << "....................... type " << type << endl; 
+
+    if (type != 4)
+    {
+        vector<uint64_t> subs;
+        if (input.take(1) == 0)
+        {
+            auto pos = input.pos + input.take(15);
+            while (input.pos < pos)
+            {
+                auto temp = part2(input);
+                subs.push_back(temp);
+            }
+            cout << "------------> subs0 " << type << ' ' << subs.size() << endl;
+        }
+        else  
+        {
+            for (auto i: aoc::range(input.take(11)))
+            {
+                auto temp = part2(input);
+                subs.push_back(temp);
+            }
+             cout << "------------> subs1 " << type << ' ' << subs.size() << endl;
+
+        }
+
+        if (subs.size() == 0) 
+        {
+            subs.push_back(3);
+            cout << "....................... push " << type << endl; 
+        } 
+
+        uint64_t value{};
+        switch (type)
+        {
+            case 0: value = accumulate(subs.begin(), subs.end(), 0ULL); break;
+            case 1: value = accumulate(subs.begin(), subs.end(), 1ULL, [](auto a, auto b){ return a * b;}); break;
+            case 2: value = *min_element(subs.begin(), subs.end()); break;
+            case 3: value = *max_element(subs.begin(), subs.end()); break;
+            case 5: value = subs[0] > subs[1]; break;
+            case 6: value = subs[0] < subs[1]; break;
+            case 7: value = subs[0] == subs[1]; break;
+        }
+
+        cout << "op " << type << " = " << value << '\n';
+        return value;
+    }
+    else
+    {
+        uint8_t  temp  = input.take(5);
+        uint64_t value = temp & 0b1111;
+        while (temp & 0b10000) // Not the last
+        {
+            temp  = input.take(5);
+            value = (value << 4) | (temp & 0b1111);
+        }
+
+        cout << "lit " << value << '\n';
+        return value;
+    }
+
+    return 0U;
+}
+
+
 void run(const char* filename)
 {
     aoc::timer timer;
@@ -164,11 +270,15 @@ void run(const char* filename)
     Packet toplevel = read_packet(input, true);
     toplevel.print();
 
-    auto p1 = toplevel.total_ver();
+    Input input1{bits, 0U};
+    //auto p1 = toplevel.total_ver();
+    auto p1 = part1(input1);
     cout << "Part1: " << p1 << '\n';
     aoc::check_result(p1, 889U);
 
-    auto p2 = toplevel.value();
+    Input input2{bits, 0U};
+    //auto p2 = toplevel.value();
+    auto p2 = part2(input2);
     cout << "Part2: " << p2 << '\n';
     aoc::check_result(p2, 739303923668U);
 }
