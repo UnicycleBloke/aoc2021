@@ -10,12 +10,12 @@ struct Packet
     uint64_t literal{};     // For literals
     vector<Packet> operands{};  // For operators
 
-    uint32_t total_ver()
+    uint32_t total_ver() const
     {
         return version + accumulate(operands.begin(), operands.end(), 0U, [](auto a, auto b) { return a + b.total_ver(); });
     }
 
-    uint64_t value()
+    uint64_t value() const
     {
         switch (type)
         {
@@ -31,6 +31,28 @@ struct Packet
             case 4: return literal;
         }
         return 0U;
+    }
+
+    void print(int indent = 0) const
+    {
+        for (auto i: aoc::range(indent * 4)) cout << ' ';
+
+        switch (type)
+        {
+            // This is cleaner and shorter than the original code, using the algorithms, but likely wastes time re-evaluating sub expressions.
+            // Note that initial value must be uint64 or the return values will lose high bits.
+            case 0: cout << "sum "; break;
+            case 1: cout << "mul "; break;
+            case 2: cout << "min "; break;
+            case 3: cout << "max "; break;
+            case 5: cout << "gt  "; break;
+            case 6: cout << "lt  "; break;
+            case 7: cout << "eq  "; break;
+            case 4: cout << "lit ";
+        }
+        cout << value() << "\n"; 
+        for (auto op: operands) 
+            op.print(indent + 1); 
     }
 };
 
@@ -140,6 +162,7 @@ void run(const char* filename)
 
     Input input{bits, 0U};
     Packet toplevel = read_packet(input, true);
+    toplevel.print();
 
     auto p1 = toplevel.total_ver();
     cout << "Part1: " << p1 << '\n';
