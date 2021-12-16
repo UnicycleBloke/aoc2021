@@ -149,7 +149,7 @@ uint8_t from_hex(char c)
 // skips everything to add the versions on the fly.
 uint64_t part1(Input& input)
 {
-    uint64_t result = input.take(3);
+    uint64_t result = input.take(3);   
     if (input.take(3) != 4)
     {
         if (input.take(1) == 0)
@@ -173,64 +173,39 @@ uint64_t part1(Input& input)
 }
 
 
-// As above, no AST was required. Just create vector of subvalues on which to 
-// use the operator. NOTE: This works perfectly for Visual Studio but not GCC
-// under Ubuntu. There is a ton of diagnostic rubbish here, which shows that the 
-// GCC version has several places in which the operations are out of order. For 
-// example it will try to find the minimum value of a subexpression before reading
-// the literal value which goes in the subexpression. So it operates on an empty 
-// vector (boom) or one without all the expected values in it. It is deterministic, 
-// but I have not been able to work out what's going on.
 uint64_t part2(Input& input)
 {
     uint16_t ver  = input.take(3);
     uint16_t type = input.take(3);
-    cout << "....................... type " << type << endl; 
 
     if (type != 4)
     {
         vector<uint64_t> subs;
         if (input.take(1) == 0)
         {
-            auto pos = input.pos + input.take(15);
+            // NOTE: Had to split this line to force correct order of argument evaluation for the +.
+            // Spent an afternoon on this little bit of UB Heaven.
+            auto len = input.take(15);
+            auto pos = input.pos + len;
             while (input.pos < pos)
-            {
-                auto temp = part2(input);
-                subs.push_back(temp);
-            }
-            cout << "------------> subs0 " << type << ' ' << subs.size() << endl;
+                subs.push_back(part2(input));
         }
         else  
         {
             for (auto i: aoc::range(input.take(11)))
-            {
-                auto temp = part2(input);
-                subs.push_back(temp);
-            }
-             cout << "------------> subs1 " << type << ' ' << subs.size() << endl;
-
+                subs.push_back(part2(input));
         }
 
-        if (subs.size() == 0) 
-        {
-            subs.push_back(3);
-            cout << "....................... push " << type << endl; 
-        } 
-
-        uint64_t value{};
         switch (type)
         {
-            case 0: value = accumulate(subs.begin(), subs.end(), 0ULL); break;
-            case 1: value = accumulate(subs.begin(), subs.end(), 1ULL, [](auto a, auto b){ return a * b;}); break;
-            case 2: value = *min_element(subs.begin(), subs.end()); break;
-            case 3: value = *max_element(subs.begin(), subs.end()); break;
-            case 5: value = subs[0] > subs[1]; break;
-            case 6: value = subs[0] < subs[1]; break;
-            case 7: value = subs[0] == subs[1]; break;
+            case 0: return accumulate(subs.begin(), subs.end(), 0ULL);
+            case 1: return accumulate(subs.begin(), subs.end(), 1ULL, [](auto a, auto b){ return a * b;});
+            case 2: return *min_element(subs.begin(), subs.end());
+            case 3: return *max_element(subs.begin(), subs.end());
+            case 5: return subs[0] > subs[1];
+            case 6: return subs[0] < subs[1];
+            case 7: return subs[0] == subs[1];
         }
-
-        cout << "op " << type << " = " << value << '\n';
-        return value;
     }
     else
     {
@@ -241,8 +216,6 @@ uint64_t part2(Input& input)
             temp  = input.take(5);
             value = (value << 4) | (temp & 0b1111);
         }
-
-        cout << "lit " << value << '\n';
         return value;
     }
 
@@ -252,8 +225,6 @@ uint64_t part2(Input& input)
 
 void run(const char* filename)
 {
-    aoc::timer timer;
-
     auto lines = aoc::read_lines(filename);
     auto bytes = aoc::comprehend(lines[0], [](auto c) -> uint8_t { return from_hex(c); });  
 
@@ -266,21 +237,27 @@ void run(const char* filename)
         bits.push_back((i & 1) > 0); 
     }
 
-    Input input{bits, 0U};
-    Packet toplevel = read_packet(input, true);
-    toplevel.print();
+    // Input input{bits, 0U};
+    // Packet toplevel = read_packet(input, true);
+    // toplevel.print();
+   
+    {
+        aoc::timer timer;
+        Input input1{bits, 0U};
+        //auto p1 = toplevel.total_ver();
+        auto p1 = part1(input1);
+        cout << "Part1: " << p1 << '\n';
+        aoc::check_result(p1, 889U);
+    }
 
-    Input input1{bits, 0U};
-    //auto p1 = toplevel.total_ver();
-    auto p1 = part1(input1);
-    cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 889U);
-
-    Input input2{bits, 0U};
-    //auto p2 = toplevel.value();
-    auto p2 = part2(input2);
-    cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 739303923668U);
+    {
+        aoc::timer timer;
+        Input input2{bits, 0U};
+        //auto p2 = toplevel.value();
+        auto p2 = part2(input2);
+        cout << "Part2: " << p2 << '\n';
+        aoc::check_result(p2, 739303923668U);
+    }
 }
 
 
