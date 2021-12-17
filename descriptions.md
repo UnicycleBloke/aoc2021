@@ -27,10 +27,13 @@
     - Counting paths in a graph (caves are nodes, tunnels are edges). DFS or BFS both work well.
 - Day 13: Transparent Origami 
     - Folding a large grid of points on X and Y axes to recover a code word.
-- Day 14:
+- Day 14: Extended Polymerization
+    - Counting elements in an exponentially growing string of letters.
 
-- Day 15:
+- Day 15: Chiton
+    - Need to implement Dijkstra's algorithm for optimal path through a grid of nodes. 
 - Day 16:
+    - Write a parser for a string of bits representing a series of nested packets. Packets are literals or operators in an expression which we have to evaluate.
 - Day 17:
 - Day 18:
 - Day 19:
