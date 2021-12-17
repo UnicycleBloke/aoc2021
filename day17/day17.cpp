@@ -40,51 +40,21 @@ struct State
 };
 
 
-int part1(int xmin, int xmax, int ymin, int ymax)
+
+
+auto part2(int xmin, int xmax, int ymin, int ymax)
 {
-    aoc::timer timer;
+    constexpr int DYMIN = -500;
+    constexpr int DYMAX = 500;
 
-    int ypeak = -10000;
-
-    for (int dx: aoc::range{-1000, 1000})
-    {
-        for (int dy: aoc::range{-1000, 1000})
-        {
-            State state;
-            state.dx    = dx;
-            state.dy    = dy;
-
-            state.xmin  = xmin;
-            state.xmax  = xmax;
-            state.ymin  = ymin;
-            state.ymax  = ymax;
-            state.ypeak = -10000;
-
-            while (!state.done() && !state.missed())
-                state.step();
-
-            if (state.done())
-            {
-                ypeak = max(ypeak, state.ypeak);
-                // cout << "(" << dx << "," << dy << ") -> " << state.ypeak << "\n";
-            }
-        }
-
-    }
-
-    return ypeak;
-}
-
-
-int part2(int xmin, int xmax, int ymin, int ymax)
-{
     aoc::timer timer;
 
     int count = 0;
+    int peak  = ymin;
 
-    for (int dx: aoc::range{-1000, 1000})
+    for (int dx: aoc::range{1, xmax + 1}) // One step would overshoot anyway
     {
-        for (int dy: aoc::range{-1000, 1000})
+        for (int dy: aoc::range{DYMIN, DYMAX})
         {
             State state;
             state.dx    = dx;
@@ -101,32 +71,26 @@ int part2(int xmin, int xmax, int ymin, int ymax)
 
             if (state.done())
             {
+                peak = max(peak, state.ypeak);
                 ++count;
-                // cout << "(" << dx << "," << dy << ") -> " << state.ypeak << "\n";
             }
         }
-
     }
 
-    return count;
+    return pair{peak, count};
 }
 
 
 void run(const char* filename)
 {
-    aoc::timer timer;
-
     auto input = aoc::read_lines<int, int, int, int>(filename, R"(target area: x=(-?\d+)..(-?\d+), y=(-?\d+)..(-?\d+))");
     auto [xmin, xmax, ymin, ymax] = input[0];
-    cout << xmin << " " <<  xmax << " " <<  ymin << " " <<  ymax << '\n';
 
-    auto p1 = part1(xmin, xmax, ymin, ymax);
-    cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 6555);
-
-    auto p2 = part2(xmin, xmax, ymin, ymax);
-    cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 4973);
+    auto ans = part2(xmin, xmax, ymin, ymax);
+    cout << "Part1: " << ans.first << '\n';
+    aoc::check_result(ans.first, 6555);
+    cout << "Part2: " << ans.second << '\n';
+    aoc::check_result(ans.second, 4973);
 }
 
 
