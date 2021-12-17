@@ -35,6 +35,7 @@
 - Day 16:
     - Write a parser for a string of bits representing a series of nested packets. Packets are literals or operators in an expression which we have to evaluate.
 - Day 17:
+    - A simple stepwise simulation for a dragged ballistic trajectory. Brute was sufficient but trimming the bounds of the initial dx really brought the time down.
 - Day 18:
 - Day 19:
 - Day 20:
