@@ -42,9 +42,6 @@ struct State
 
 auto part2(int xmin, int xmax, int ymin, int ymax)
 {
-    constexpr int DYMIN = -500;
-    constexpr int DYMAX = 500;
-
     aoc::timer timer;
 
     int count = 0;
@@ -54,7 +51,12 @@ auto part2(int xmin, int xmax, int ymin, int ymax)
     // A speed of xmax + 1 overshoots immediately.
     for (int dx: aoc::range{int(sqrt(2*xmin)-1), xmax + 1}) 
     {
-        for (int dy: aoc::range{DYMIN, DYMAX})
+        // A speed of more than yrange would overshoot the target whether it is 
+        // above or below the origin. Going down would overshoot on the first step.
+        // Going up would overshoot when it returns to the ground - the y speed would 
+        // be the same as for the first step.
+        int yrange = max(abs(ymin), abs(ymax)) + 1;    
+        for (int dy: aoc::range{-yrange, yrange})
         {
             State state;
             state.dx    = dx;
