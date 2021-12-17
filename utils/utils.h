@@ -18,6 +18,7 @@
 #include <type_traits>
 #include <chrono>
 #include <tuple>
+#include <cmath>
 
 #include "conway.h"
 #include "range.h"

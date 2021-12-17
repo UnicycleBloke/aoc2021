@@ -40,8 +40,6 @@ struct State
 };
 
 
-
-
 auto part2(int xmin, int xmax, int ymin, int ymax)
 {
     constexpr int DYMIN = -500;
@@ -51,8 +49,10 @@ auto part2(int xmin, int xmax, int ymin, int ymax)
 
     int count = 0;
     int peak  = ymin;
-
-    for (int dx: aoc::range{1, xmax + 1}) // One step would overshoot anyway
+   
+    // A speed of N peters out at x = N(N+1)/2, so dxmin is ~(sqrt(2*xmin)-1).
+    // A speed of xmax + 1 overshoots immediately.
+    for (int dx: aoc::range{int(sqrt(2*xmin)-1), xmax + 1}) 
     {
         for (int dy: aoc::range{DYMIN, DYMAX})
         {
