@@ -32,11 +32,13 @@
 
 - Day 15: Chiton
     - Need to implement Dijkstra's algorithm for optimal path through a grid of nodes. 
-- Day 16:
+- Day 16: Packet Decoder
     - Write a parser for a string of bits representing a series of nested packets. Packets are literals or operators in an expression which we have to evaluate.
-- Day 17:
+- Day 17: Trick Shot
     - A simple stepwise simulation for a dragged ballistic trajectory. Brute was sufficient but trimming the bounds of the initial dx really brought the time down.
-- Day 18:
+- Day 18: Snailfish
+    - Special snailfish numbers are represented by trees. Parse expressions into trees and then perform operations. The "explode" operation was 
+    really hard to get my head around, but the final implementation proved faily simple.  
 - Day 19:
 - Day 20:
 - Day 21:

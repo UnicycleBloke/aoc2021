@@ -4,7 +4,8 @@
 struct Number
 {
     int value{};
-    vector<Number> subs{}; 
+    vector<Number> subs{};
+    static int index; 
     
     bool isdigit() const
     {
@@ -27,6 +28,53 @@ struct Number
         }
 
         if (end) os << '\n';
+    }
+
+    void graph(ostream& os, int& id)
+    {
+        static const vector<string> colours =
+        {
+            "red", "blue", "green", "cyan", "yellow", "magenta", 
+            "coral", "aquamarine", "blueviolet", "chartreuse"
+        };
+
+        int node_id = ++id;
+        if (isdigit()) 
+        {
+            os << "Node_" << node_id << " [style=filled, label=\"" << value << "\"";
+            //os << ", color=" << colours[value];
+            //os << ", fontcolor=" << colours[value];
+            os << ", fillcolor=" << colours[value % 10];
+            os << "]" << '\n';
+
+        }
+        else
+        {
+            os << "Node_" << node_id << " [label=\"" << magnitude() << "\"";
+            os << ", color=" << colours[magnitude() % 10];
+            //os << ", fontcolor=" << colours[value];
+            //os << ", fillcolor=" << colours[value];
+            os << "]" << '\n';
+
+            os << "Node_" << node_id << " -> " << "Node_" << (id +1) << '\n';
+            subs[0].graph(os, id);
+
+            os << "Node_" << node_id << " -> " << "Node_" << (id +1) << '\n';
+            subs[1].graph(os, id);
+        }
+    }
+
+    void graph() 
+    {
+        char filename[32];
+        snprintf(filename, 32, "dot/day18-%06d.dot", index++);
+        ofstream os{filename};
+        os << "digraph Day18 {\n";
+        
+        int id = 0;
+        graph(os, id);
+
+        os << "}\n";
     }
 
     void print()
@@ -56,6 +104,9 @@ struct Number
         return result;
     }
 };
+
+
+int Number::index = 0; 
 
 
 struct Splitter
@@ -169,6 +220,8 @@ Number parse(const string& line)
 
 void reduce(Number& number)
 {
+    number.graph();
+
     bool stop = false;
     while (!stop)
     {
@@ -178,6 +231,7 @@ void reduce(Number& number)
         if (e.explode(number))
         {
             stop = false;
+            number.graph();
             continue;
         }
 
@@ -185,6 +239,7 @@ void reduce(Number& number)
         if (s.split(number))
         {
             stop = false;
+            number.graph();
             continue;
         }
     }
@@ -313,9 +368,9 @@ void run(const char* filename)
     cout << "Part1: " << p1 << '\n';
     aoc::check_result(p1, 3647);
 
-    auto p2 = part2(input);
-    cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 4600);
+    // auto p2 = part2(input);
+    // cout << "Part2: " << p2 << '\n';
+    // aoc::check_result(p2, 4600);
 }
 
 
