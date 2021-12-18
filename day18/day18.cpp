@@ -223,14 +223,17 @@ auto part2(T input)
     aoc::timer timer;
 
     int mag = 0;
-    for (auto i: aoc::range(input.size()))
+
+    vector<Number> numbers;
+    for (auto s: input)
+        numbers.push_back(parse(s));
+
+    for (auto i: aoc::range(numbers.size()))
     {
-        for (auto j: aoc::range(i + 1, input.size()))
+        for (auto j: aoc::range(i + 1, numbers.size()))
         {
-            Number left  = parse(input[i]);
-            Number right = parse(input[j]);
-            mag = max(mag, add(left, right).magnitude());
-            mag = max(mag, add(right, left).magnitude());
+            mag = max(mag, add(numbers[i], numbers[j]).magnitude());
+            mag = max(mag, add(numbers[j], numbers[i]).magnitude());
         }
     }
 
