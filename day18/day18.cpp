@@ -139,7 +139,6 @@ struct Exploder
 };
 
 
-
 Number parse(const string& line, int& pos)
 {
     Number res;
@@ -178,8 +177,6 @@ void reduce(Number& number)
         Exploder e;
         if (e.explode(number))
         {
-            //cout << "explode: ";
-            //number.print();
             stop = false;
             continue;
         }
@@ -187,8 +184,6 @@ void reduce(Number& number)
         Splitter s;
         if (s.split(number))
         {
-            //cout << "split:   ";
-            //number.print();
             stop = false;
             continue;
         }
@@ -196,23 +191,12 @@ void reduce(Number& number)
 }
 
 
-Number add(Number left, Number right)
+Number add(const Number& left, const Number& right)
 {
-    // cout << "   ";
-    // left.print();
-    // cout << " + ";
-    // right.print();
-
     Number res{0};
     res.subs.push_back(left);
     res.subs.push_back(right);
-    // cout << " # ";
-    // res.print();
-
     reduce(res);
-    // cout << " = ";
-    // res.print();
-
     return res;
 }
 
@@ -223,18 +207,11 @@ auto part1(T input)
     aoc::timer timer;
 
     Number left = parse(input[0]);
-    left.print();
-    cout << left.magnitude() << '\n';
-
     for (auto i: aoc::range(1U, input.size()))
     {
         Number right = parse(input[i]);
-        right.print();
-        cout << right.magnitude() << '\n';
         left = add(left, right);
     }
-
-    left.print();  
 
     return left.magnitude();
 }
@@ -252,18 +229,8 @@ auto part2(T input)
         {
             Number left  = parse(input[i]);
             Number right = parse(input[j]);
-
-            left = add(left, right);
-            mag = max(mag, left.magnitude());
-        }
-
-        for (auto j: aoc::range(i + 1, input.size()))
-        {
-            Number left  = parse(input[i]);
-            Number right = parse(input[j]);
-
-            left = add(right, left);
-            mag = max(mag, left.magnitude());
+            mag = max(mag, add(left, right).magnitude());
+            mag = max(mag, add(right, left).magnitude());
         }
     }
 
@@ -274,7 +241,6 @@ auto part2(T input)
 void test_magnitde(string str, int exp)
 {
     auto num = parse(str);
-    //num.print();
     aoc::check_result(num.magnitude(), exp);
 }
 
@@ -282,12 +248,8 @@ void test_magnitde(string str, int exp)
 void test_explode(string str, string exp)
 {
     auto num = parse(str);
-    //num.print();
-
     Exploder e;
     e.explode(num);
-    //num.print();
-
     if (num.repr() != exp)
         std::cout << "ERROR: expected = " << exp << " but got = " << num.repr() << '\n';
 }
