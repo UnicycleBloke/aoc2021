@@ -72,6 +72,7 @@ struct Scanner
     vector<int>   fingerprint{}; 
     void make_fingerprint()
     {
+        // We have 25 or so points, so have N(N-1)/2 distances to consider.
         const auto& c = clouds[0];
         for (auto i: aoc::range(c.size()))
             for (auto j: aoc::range(i + 1, c.size()))
@@ -210,6 +211,7 @@ bool check_fingerprints(Scanner& a, Scanner& b)
     for (auto d: a.fingerprint) s.insert(d);
     for (auto d: b.fingerprint) s.insert(d);
 
+    // We expect at least 12 common points, so have N(N-1)/2 = 66 distances to be the same.
     return (s.size() + 66) <= (a.fingerprint.size() + b.fingerprint.size());
 }
 
