@@ -42,6 +42,15 @@ int manhattan(Pos p1, Pos p2)
 }
 
 
+int distance(Pos p1, Pos p2)
+{
+    int x = p1.x-p2.x;
+    int y = p1.y-p2.y;
+    int z = p1.z-p2.z;
+    return x*x + y*y + z*z;
+}
+
+
 using Cloud = vector<Pos>;
 
 struct Scanner
@@ -53,6 +62,21 @@ struct Scanner
     Pos           offset{};   // Relative to another.
     Scanner*      parent{};
     int           index{};  
+
+    // Added later as a performance booster.
+    // This was something I considered early on, but gave up in haste. I see 
+    // that someone else used this idea, and I have revisited the code to add it. 
+    // Basically create a characteristic from the distances between all the points 
+    // in a scanner's point cloud. This is independently of orientation, and is a 
+    // great filter to omit pointless checks of 24 * 24 rotations.
+    vector<int>   fingerprint{}; 
+    void make_fingerprint()
+    {
+        const auto& c = clouds[0];
+        for (auto i: aoc::range(c.size()))
+            for (auto j: aoc::range(i + 1, c.size()))
+                fingerprint.push_back(distance(c[i], c[j]));
+    }
 
     Pos get_offset() const
     { 
@@ -180,6 +204,16 @@ bool check_overlap(const Cloud& a, const Cloud& b, Pos& offset)
 }
 
 
+bool check_fingerprints(Scanner& a, Scanner& b)
+{
+    set<int> s;
+    for (auto d: a.fingerprint) s.insert(d);
+    for (auto d: b.fingerprint) s.insert(d);
+
+    return (s.size() + 66) <= (a.fingerprint.size() + b.fingerprint.size());
+}
+
+
 bool check_overlap(Scanner& a, Scanner& b, int& solved)
 {
     //cout << "check_overlap scans  " << a.index << " " << b.index << "\n"; 
@@ -192,6 +226,8 @@ bool check_overlap(Scanner& a, Scanner& b, int& solved)
         for (auto j: aoc::range(b.clouds.size()))
         {
             if (b.solved && (j != b.rotation)) continue;
+
+            if (!check_fingerprints(a, b)) continue;
 
             //cout << "check_overlap clouds " << i << " " << j << "\n"; 
 
@@ -241,13 +277,10 @@ auto part1(vector<Scanner>& scanners)
         for (auto i: aoc::range(scanners.size()))
         {
             auto& sa = scanners[i];
-
             for (auto j: aoc::range(i + 1, scanners.size())) 
             {
                 auto& sb = scanners[j];
-
                 if ((i > 0) && !sa.solved && !sb.solved) continue;
-
                 check_overlap(sa, sb, solved);
             }
         }
@@ -317,12 +350,13 @@ void run(const char* filename)
             }
 
             Scanner scanner;
-            scanner.index = index++;
+            scanner.index = index++;           
             // Add all 24 rotations avoid doing this repeatedly.
             for (auto rot: g_rots)
             {
                 scanner.clouds.push_back(rotate(cloud, rot));
             }
+            scanner.make_fingerprint();
 
             scanners.push_back(scanner);
         }
