@@ -21,7 +21,7 @@ target_link_libraries(${AOC_PROGRAM_NAME} aocutils)
 endif (WIN32)
 if (UNIX)
 target_compile_options(${AOC_PROGRAM_NAME} PUBLIC -std=c++17 -O2)
-#target_compile_options(${AOC_PROGRAM_NAME} PUBLIC -std=c++17 -g)
+#target_compile_options(${AOC_PROGRAM_NAME} PUBLIC -std=c++17 -g -Og)
 target_link_libraries(${AOC_PROGRAM_NAME} curses aocutils)
 endif (UNIX)
 
