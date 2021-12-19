@@ -6,6 +6,8 @@ struct Pos
     int x{}; int y{}; int z{};
 };
 using Cube = set<Pos>;
+using Rot  = Pos;
+
 
 bool operator<(Pos a, Pos b)
 {
@@ -14,34 +16,49 @@ bool operator<(Pos a, Pos b)
     if ((a.x == b.x) && (a.y == b.y) && (a.z < b.z)) return true;
     return false;
 }
+
+
 Pos operator+(Pos a, Pos b)
 {
     return Pos{a.x + b.x, a.y + b.y, a.z + b.z};
 }
+
+
 Pos operator-(Pos a, Pos b)
 {
     return Pos{a.x - b.x, a.y - b.y, a.z - b.z};
 }
+
+
 void print(Pos p)
 {
     cout << "(" << p.x << "," << p.y << "," << p.z <<")\n";
 }
 
-struct CubeInfo
+
+int manhattan(Pos p1, Pos p2)
 {
-    Cube points2{};
-    Cube points{};
-    Cube rots{};   // Set of rotation - remove as not found
-    Pos  offset{}; // From world (0,0,0) or something
-    CubeInfo* parent{};
-    int index{};
-    int parent_idx{-1};
+    return abs(p1.x - p2.x) + abs(p1.y - p2.y) + abs(p1.z - p2.z);
+}
+
+
+using Cloud = vector<Pos>;
+
+struct Scanner
+{
+    // 24 sets of points created once.
+    vector<Cloud> clouds{};
+    int           rotation{}; // Index into clouds
+    bool          solved{};   // We have fixed the location
+    Pos           offset{};   // Relative to another.
+    Scanner*      parent{};
+    int           index{};  
 
     Pos get_offset() const
     { 
         if (index == 0) 
         {
-            cout << index << "\n" << endl;    
+            //cout << index << "\n" << endl;    
             return Pos{0, 0, 0};
         }
         if (parent == nullptr)
@@ -49,48 +66,10 @@ struct CubeInfo
             cout << "null parent " << index << endl;    
             return Pos{0, 0, 0};
         }
-        cout << index << " -> ";
+        //cout << index << " -> ";
         return offset + parent->get_offset(); 
     }
 };
-
-
-
-
-void print(const Cube& c)
-{
-    for (auto [x, y, z]: c)
-        cout << "(" << x << "," << y << "," << z <<") ";
-    cout << '\n';
-}
-
-
-// set<Pos> find_rots()
-// {
-//     set<Pos> pos;
-//     set<Pos> rot;
-//     const Pos p{1, 2, 3};
-
-//     for (int i: aoc::range(4))
-//     {
-//         for (int j: aoc::range(4))
-//         {
-//             for (int k: aoc::range(4))
-//             {
-//                 auto r = rotate(p, {i, j, k});
-//                 auto [it, added] = pos.insert(r);
-//                 if (added)
-//                     rot.insert({i, j, k});
-//             }
-//         }
-//     }
-
-//     cout << rot.size() << '\n';
-//     for (auto [i, j, k]: rot)
-//         cout << "rota (" << i << "," << j << "," << k <<")\n";
-
-//     return rot;
-// }
 
 
 const set<Pos> g_rots =
@@ -122,7 +101,7 @@ const set<Pos> g_rots =
 };
 
 
-Pos rotate(const Pos& pos, const Pos& rot)
+Pos rotate(const Pos& pos, const Rot& rot)
 {
     Pos p = pos;
 
@@ -154,234 +133,208 @@ Pos rotate(const Pos& pos, const Pos& rot)
 }
 
 
-Cube rotate(const Cube& cube, const Pos& rot)
+Cloud rotate(const Cloud& cloud, const Rot& rot)
 {
-    Cube res;
-    for (auto p: cube)
-        res.insert(rotate(p, rot));
+    Cloud res;
+    for (auto p: cloud)
+        res.push_back(rotate(p, rot));
     return res;
 }
 
 
 // Make points relative to one in the set.
-Cube offset(const Cube& c, Pos p)
+Cloud offset(const Cloud& c, const Pos& p)
 {
-    Cube r;
+    Cloud r;
     for (auto& [x, y, z]: c)
-        r.insert({x-p.x, y-p.y, z-p.z});
+        r.push_back({x-p.x, y-p.y, z-p.z});
     return r;
 }
 
 
-Cube common(const Cube& a, const Cube& b)
+bool check_overlap(const Cloud& a, const Cloud& b, Pos& offset)
 {
-    Cube res;
-    for (auto i: a) res.insert(i);
-    for (auto i: b) res.insert(i);
-    return res;
-}
-
-
-bool overlaps(const Cube& a, const Cube& b, Pos& off)
-{
-    for (Pos pa: a)
+    // Check pairs of points as offsets to make overlaps happen.
+    // About 25 * 25 tests at most. Not terrible, but nested in more loops.
+    for (auto i: aoc::range(a.size()))
     {
-        auto a2 = offset(a, pa);
-        for (Pos pb: b)
+        const auto& pa = a[i];
+        for (auto j: aoc::range(b.size()))
         {
-            auto b2 = offset(b, pb);
-            auto c  = common(a2, b2);
+            const auto& pb = b[j];
 
-            if ((c.size() + 12) <= (a.size() + b.size()))
+            set<Pos> s;
+            for (auto p: a) s.insert(p - pa);
+            for (auto p: b) s.insert(p - pb);
+
+            if ((s.size() + 12) <= (a.size() + b.size()))
             {
-                Pos d{pa.x - pb.x, pa.y - pb.y, pa.z - pb.z};
-                off = d;
-                cout << "delta"; 
-                print(d);
-                cout << endl; 
+                //cout << s.size() << " " << a.size() << " " << b.size() << "\n";
+                offset = pa - pb;
                 return true;
             }
         }
     }
+
     return false;
 }
 
 
-bool overlaps2(CubeInfo& a, CubeInfo& b)
+bool check_overlap(Scanner& a, Scanner& b, int& solved)
 {
-    for (auto ra: a.rots)
+    //cout << "check_overlap scans  " << a.index << " " << b.index << "\n"; 
+
+    // For pairs of rotated point clouds.
+    // Up to 24 x 24 comparisons. This is starting to get expensive.
+    for (auto i: aoc::range(a.clouds.size()))
     {
-        auto ca = rotate(a.points, ra);
-        for (auto rb: b.rots)
+        if (a.solved && (i != a.rotation)) continue;
+        for (auto j: aoc::range(b.clouds.size()))
         {
-            auto cb = rotate(b.points, rb);
+            if (b.solved && (j != b.rotation)) continue;
+
+            //cout << "check_overlap clouds " << i << " " << j << "\n"; 
 
             Pos offset{};
-            if (overlaps(ca, cb, offset))
+            if (check_overlap(a.clouds[i], b.clouds[j], offset))
             {
-                if (a.rots.size() > 1)
+                if (!a.solved)
                 {
-                    a.rots.clear();
-                    a.rots.insert(ra);
-                    a.offset  = Pos{} - offset;
-                    a.parent  = &b;
-                    a.points2 = ca;
-                    a.parent_idx = b.index;
-                }
+                    a.solved   = true;
+                    a.offset   = Pos{} - offset;
+                    a.parent   = &b;
+                    a.rotation = i; 
+                    ++solved;
 
-                if (b.rots.size() > 1)
+                    cout << "solved  " << solved <<  " " << a.index << "\n"; 
+                    print(Pos{} - offset); 
+                }
+                if (!b.solved)
                 {
-                    b.rots.clear();
-                    b.rots.insert(rb);                    
-                    b.offset  = offset;
-                    b.parent  = &a;
-                    b.points2 = cb;
-                    b.parent_idx = a.index;
+                    b.solved   = true;
+                    b.offset   = offset;
+                    b.parent   = &a;
+                    b.rotation = j; 
+                    ++solved;
+
+                    cout << "solved  " << solved <<  " " << b.index << "\n"; 
+                    print(offset); 
                 }
 
                 return true;
             }
         }
-    }    
+    }
+
     return false;
 }
 
 
-int manhattan(Pos p1, Pos p2)
+auto part1(vector<Scanner>& scanners)
 {
-    return abs(p1.x - p2.x) + abs(p1.y - p2.y) + abs(p1.z - p2.z);
-}
-
-
-template <typename T>
-auto part1(T input)
-{ 
-    set<size_t> unsolved;
-    for (auto i: aoc::range(1U, input.size()))
-        unsolved.insert(i);
-
-    set<size_t> solved;
-    for (auto i: aoc::range(1U, input.size()))
-    {
-        if (overlaps2(input[0], input[i]))
-        {  
-            solved.insert(i);
-            solved.insert(0);
-            unsolved.erase(i);
-        } 
-    }
+    cout << "Part1\n";
     
-    while (solved.size() < input.size())
+    int solved = 0;
+    while (solved < scanners.size())
     {
-        //set<size_t> solved2;
-
-        bool stop = false;
-        for (auto i: solved)
+        // For pairs of scanners.
+        for (auto i: aoc::range(scanners.size()))
         {
-            //solved2.insert(i);
-            //for (auto j: aoc::range(input.size()))
-            for (auto j: unsolved)
+            auto& sa = scanners[i];
+
+            for (auto j: aoc::range(i + 1, scanners.size())) 
             {
-                if (solved.find(j) != solved.end()) continue;
+                auto& sb = scanners[j];
 
-                cout << "cubes " << solved.size() << ' ' << i << " " << j << '\n';
-                if (overlaps2(input[i], input[j]))
-                {  
-                    //solved2.insert(j);
-                    unsolved.erase(j);
-                    solved.insert(j);
-                    stop = true;
-                    break;
-                } 
+                if ((i > 0) && !sa.solved && !sb.solved) continue;
+
+                check_overlap(sa, sb, solved);
             }
-
-            if (stop) break;
         }
-        
-        //solved = solved2;
     }
+    scanners[0].parent = nullptr; 
 
-
-    cout << "done" << endl;
-
-    for (auto& c: input)
-    {
-        print(c.get_offset());
-    }
+    // for (auto& s: scanners)
+    // {
+    //     Pos off = s.get_offset();
+    //     print(off);
+    // }
 
     set<Pos> beacons;
-    for (auto& s: input)
+    for (auto& s: scanners)
     {
-        for (auto p: s.points2)
+        Pos off = s.get_offset();
+        for (auto p: s.clouds[s.rotation])
         {
-            Pos off = s.get_offset();
-            Pos b{p.x + off.x, p.y + off.y, p.z + off.z};
-            print(b);
+            Pos b = p + off;
+            //print(b);
             beacons.insert(b);
         }
     }
+    return beacons.size();
+}
 
+
+auto part2(vector<Scanner>& scanners)
+{
     int max_dist = 0;
-    for (auto i: aoc::range(input.size()))
+    for (auto i: aoc::range(scanners.size()))
     {
-        auto p1 = input[i].get_offset();
-        for (auto j: aoc::range(i+1, input.size()))
+        auto p1 = scanners[i].get_offset();
+        for (auto j: aoc::range(i + 1, scanners.size()))
         {
-            auto p2 = input[j].get_offset();
+            auto p2   = scanners[j].get_offset();
             auto dist = manhattan(p1, p2);
-            cout << i << " " << j << " " << dist << '\n';
-            max_dist = max(max_dist, dist);
+            max_dist  = max(max_dist, dist);
         }
     }
-    
+
     return max_dist;
 }
-
-
-template <typename T>
-auto part2(T input)
-{
-    aoc::timer timer;
-    return 0;
-}
-
 
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, false); 
 
-    vector<CubeInfo> cubes;
-    CubeInfo info;
-    info.rots = g_rots;
-
-    for (auto i: aoc::range(1U, lines.size()))
+    vector<Scanner> scanners;
+    int index = 0;
+    size_t i = 0;
+    while (i < lines.size())
     {
-        auto line = lines[i];
+        auto line = lines[i++];
+        if ((line[1] == '-'))
+        {
+            Cloud cloud;
+            while ((i < lines.size()) && (lines[i][1] != '-'))
+            {
+                line = lines[i++];
 
-        if ((line[0] == '-') && (line[1] == '-'))
-        {
-            cubes.push_back(info);
-            info.points.clear();
-            ++info.index;
-        }
-        else
-        {
-            auto s = aoc::replace(line, ",", " ");
-            istringstream is(s);
-            Pos pos;
-            is >> pos.x >> pos.y >> pos.z; 
-            info.points.insert(pos);
+                auto s = aoc::replace(line, ",", " ");
+                istringstream is(s);
+                Pos pos;
+                is >> pos.x >> pos.y >> pos.z; 
+                cloud.push_back(pos);
+            }
+
+            Scanner scanner;
+            scanner.index = index++;
+            // Add all 24 rotations avoid doing this repeatedly.
+            for (auto rot: g_rots)
+            {
+                scanner.clouds.push_back(rotate(cloud, rot));
+            }
+
+            scanners.push_back(scanner);
         }
     }
-    cubes.push_back(info);
 
-    auto p1 = part1(cubes);
+    auto p1 = part1(scanners);
     cout << "Part1: " << p1 << '\n';
-    //aoc::check_result(p1, 3647);
+    aoc::check_result(p1, 459U);
 
-    auto p2 = part2(cubes);
+    auto p2 = part2(scanners);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 4600);
+    aoc::check_result(p2, 19130);
 }
 
 
