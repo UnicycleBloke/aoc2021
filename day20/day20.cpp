@@ -1,21 +1,32 @@
 #include "utils.h"
+#include "cpp_curses.h"
 
 
 int value(const vector<vector<int>>& grid, int r, int c)
 {
     int result = 0;
 
-    result = (result << 1) | (grid[r-1][c-1] == 1);
-    result = (result << 1) | (grid[r-1][c]   == 1);
-    result = (result << 1) | (grid[r-1][c+1] == 1);
+    auto rows = grid.size();
+    auto cols = grid[0].size();
 
-    result = (result << 1) | (grid[r][c-1] == 1);
-    result = (result << 1) | (grid[r][c]   == 1);
-    result = (result << 1) | (grid[r][c+1] == 1);
+    // This wraps the indices to make the grid effectively infinite in extent.
+    // Or, if not infinite, repeats or maps to a torus.
+    int rp = (r + 1) % rows;
+    int rm = (r - 1 + rows) % rows;
+    int cp = (c + 1) % cols;
+    int cm = (c - 1 + cols) % cols;
 
-    result = (result << 1) | (grid[r+1][c-1] == 1);
-    result = (result << 1) | (grid[r+1][c]   == 1);
-    result = (result << 1) | (grid[r+1][c+1] == 1);
+    result = (result << 1) | (grid[rm][cm] == 1);
+    result = (result << 1) | (grid[rm][c]  == 1);
+    result = (result << 1) | (grid[rm][cp] == 1);
+
+    result = (result << 1) | (grid[r][cm] == 1);
+    result = (result << 1) | (grid[r][c]  == 1);
+    result = (result << 1) | (grid[r][cp] == 1);
+
+    result = (result << 1) | (grid[rp][cm] == 1);
+    result = (result << 1) | (grid[rp][c]  == 1);
+    result = (result << 1) | (grid[rp][cp] == 1);
 
     return result;
 }
@@ -37,22 +48,17 @@ void print(const vector<vector<int>>& grid)
 
 auto nsteps(string algo, vector<vector<int>> grid, int n)
 {
+    auto rows = grid.size();
+    auto cols = grid[0].size();
+
     //print(grid);
 
-    //for (auto k: aoc::range(2))
+    auto grid2 = grid;
     for (auto k: aoc::range(n))
     {
-        // This tripped me up - the example had '.' in the first location, so
-        // the infinite grid was all '.'. In my case it toggles on/off.
-        auto grid2 = grid;
-        int i = value(grid, 1, 1);
-        for (auto r: aoc::range(grid.size()))
-            for (auto c: aoc::range(grid[0].size()))
-                grid2[r][c] = (algo[i] == '#'); 
-
-        for (auto r: aoc::range(3U, grid.size()-3))
+        for (auto r: aoc::range(rows))
         {
-            for (auto c: aoc::range(3U, grid[0].size()-3))
+            for (auto c: aoc::range(cols))
             {
                 int index = value(grid, r, c);
                 grid2[r][c] = (algo[index] == '#'); 
@@ -63,9 +69,9 @@ auto nsteps(string algo, vector<vector<int>> grid, int n)
     }
 
     int count = 0;
-    for (auto r: aoc::range(1U, grid.size()-1))
+    for (auto r: aoc::range(grid.size()))
     {
-        for (auto c: aoc::range(1U, grid[0].size()-1))
+        for (auto c: aoc::range(grid[0].size()))
         {
             count += grid[r][c];
         }
@@ -97,8 +103,7 @@ void run(const char* filename)
     int  nrows  = lines.size() - 1;
 
     // Plenty of room around the edges for growth.
-    // Or could use a map of (x,y) -> on/off.
-    constexpr int EXTRA = 60;
+    constexpr int EXTRA = 50;
     vector<int> row(ncols + EXTRA*2, 0);
     vector<vector<int>> grid(nrows + EXTRA*2, row);
 

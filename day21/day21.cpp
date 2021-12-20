@@ -1,14 +1,40 @@
 #include "utils.h"
+//#include "cpp_curses.h"
 
 
-auto part1(const string& algo, const vector<vector<int>>& grid)
+// void render(const vector<vector<int>>& grid)
+// {
+//     static int frame = 0;
+    
+//     clear();
+
+//     for (auto r: aoc::range(1U, grid.size()-1))
+//     {
+//         for (auto c: aoc::range(1U, grid[0].size()-1))
+//         {
+//             aoc::write((grid[r][c] == 0) ? '.' : '#', c, r);
+//         }
+//     }
+
+//     ostringstream os;
+//     os << "Frame: " << frame++ << " ";
+//     aoc::write(os.str(), 2, 2);
+
+//     refresh();
+//     getch();
+// }
+
+
+template <typename T>
+auto part1(T input)
 {
     aoc::timer timer;
     return 0;
 }
 
 
-auto part2(const string& algo, const vector<vector<int>>& grid)
+template <typename T>
+auto part2(T input)
 {
     aoc::timer timer;
     return 0;
@@ -17,20 +43,23 @@ auto part2(const string& algo, const vector<vector<int>>& grid)
 
 void run(const char* filename)
 {
-    auto lines = aoc::read_lines(filename, false); 
+    auto input = aoc::read_lines(filename);
+    //auto input = aoc::read_lines<int, int, int, int>(filename, R"((\d+),(\d+)\s->\s(\d+),(\d+))");
 
-    auto p1 = part1(algo, grid);
+    auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 5218);
+    //aoc::check_result(p1, 0);
 
-    auto p2 = part2(algo, grid);
+    auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 15527);
+    //aoc::check_result(p2, 0);
 }
 
 
 int main(int argc, char** argv)
 {
+    //aoc::CursesApp app;
+
     aoc::timer timer;
     try
     {

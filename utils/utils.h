@@ -22,6 +22,7 @@
 
 #include "conway.h"
 #include "range.h"
+//#include "cpp_curses.h"
 
 
 using namespace std;
