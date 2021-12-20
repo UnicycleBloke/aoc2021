@@ -98,8 +98,9 @@ void run(const char* filename)
 
     // Plenty of room around the edges for growth.
     // Or could use a map of (x,y) -> on/off.
-    vector<int> row(ncols + 400, 0);
-    vector<vector<int>> grid(nrows + 400, row);
+    constexpr int EXTRA = 60;
+    vector<int> row(ncols + EXTRA*2, 0);
+    vector<vector<int>> grid(nrows + EXTRA*2, row);
 
     for (auto r: aoc::range(nrows))
     {
@@ -107,7 +108,7 @@ void run(const char* filename)
         for (auto c: aoc::range(ncols))
         {
             if (line[c] == '#')
-                grid[r + 200][c + 200] = 1;
+                grid[r + EXTRA][c + EXTRA] = 1;
         }
     }
 
