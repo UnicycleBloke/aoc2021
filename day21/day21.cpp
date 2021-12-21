@@ -14,6 +14,8 @@ int roll()
 
 auto part1(int p1, int p2)
 {
+    aoc::timer timer;
+
     int s1 = 0;
     int s2 = 0;
 
@@ -50,6 +52,11 @@ struct Wins
     {
         return Wins{w1.p1 + w2.p1, w1.p2 + w2.p2 };
     }
+
+    friend Wins operator*(Wins w, int s)
+    {
+        return Wins{w.p1 * s, w.p2 * s};
+    }
 };
 
 
@@ -62,12 +69,11 @@ size_t make_key(const vector<int>& vec)
 }
 
 
-const array<int, 27> rolls
-{
-    3,4,5, 4,5,6, 5,6,7, 
-    4,5,6, 5,6,7, 6,7,8, 
-    5,6,7, 6,7,8, 7,8,9
-};
+// Sum of three rolls of the Dirac Die
+//const array<int, 9> rolls{3,4,5,6,7,8,9};
+const array<int, 27> rolls{3, 4,4,4, 5,5,5,5,5,5, 6,6,6,6,6,6,6, 7,7,7,7,7,7, 8,8,8, 9};
+// Frequency of each sum - an optimisation.
+//const array<int, 9> scale{1,3,6,7,6,3,1};
 
 
 Wins play2(int turn, int s1, int p1, int r1, int s2, int p2, int r2);
@@ -82,13 +88,13 @@ Wins play1(int turn, int s1, int p1, int r1, int s2, int p2, int r2)
     s1 += p1;
     if (s1 >= 21) return {1U, 0U};
 
-    vector<int> x{turn, 1, s1, p1, r1, s2, p2, r2};
+    vector<int> x{1, s1, p1, s2, p2};
     auto k = make_key(x); 
     if (games.find(k) != games.end()) return games[k];
 
     Wins result{};
     for (auto i: aoc::range{rolls.size()})
-        result += play2(turn, s1, p1, r1, s2, p2, rolls[i]);
+        result += play2(turn, s1, p1, r1, s2, p2, rolls[i]);// * scale[i];
 
     games[k] = result;
     return result;
@@ -101,13 +107,13 @@ Wins play2(int turn, int s1, int p1, int r1, int s2, int p2, int r2)
     s2 += p2;
     if (s2 >= 21) return {0U, 1U};
 
-    vector<int> x{turn, 2, s1, p1, r1, s2, p2, r2};
+    vector<int> x{2, s1, p1, s2, p2};
     auto k = make_key(x); 
     if (games.find(k) != games.end()) return games[k];
 
     Wins result{};
     for (auto i: aoc::range{rolls.size()})
-        result += play1(turn+1, s1, p1, rolls[i], s2, p2, r2);
+        result += play1(turn+1, s1, p1, rolls[i], s2, p2, r2);// * scale[i];
 
     games[k] = result;
     return result;
@@ -116,9 +122,11 @@ Wins play2(int turn, int s1, int p1, int r1, int s2, int p2, int r2)
 
 auto part2(int p1start, int p2start)
 {
+    aoc::timer timer;
+
     Wins result{};
     for (auto i: aoc::range{rolls.size()})
-        result += play1(1, 0, p1start, rolls[i], 0, p2start, 0);
+        result += play1(1, 0, p1start, rolls[i], 0, p2start, 0);// * scale[i];
     return max(result.p1, result.p2);
 }
 
