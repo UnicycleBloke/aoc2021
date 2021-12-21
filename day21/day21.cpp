@@ -85,25 +85,6 @@ struct Wins
 };
 
 
-struct Key
-{
-    int t; // turn 
-    int s; //core;
-    int p; //os;
-    int r; //oll;
-};
-
-
-bool operator<(Key a, Key b)
-{
-    if ((a.t <  b.t)) return true;
-    if ((a.t == b.t) && (a.s <  b.s)) return true;
-    if ((a.t == b.t) && (a.s == b.s) && (a.p <  b.p)) return true;
-    if ((a.t == b.t) && (a.s == b.s) && (a.p == b.p) && (a.r < a.r)) return true;
-    return false;
-}
-
-
 map<size_t, Wins> games;
 int keys = 0;
 
@@ -126,67 +107,38 @@ Wins wins(int turn, bool play1, int s1, int p1, int r1, int s2, int p2, int r2)
         5,6,7, 6,7,8, 7,8,9
     };
 
-    // vector<int> x{turn, play1 ? 1 : 2, s1, p1, r1, s2, p2, r2};
-    // size_t k = make_key(x); 
-    // if (games.find(k) != games.end()) return games[k];
+    vector<int> x{turn, play1 ? 1 : 2, s1, p1, r1, s2, p2, r2};
+    size_t k = make_key(x); 
+    if (games.find(k) != games.end()) return games[k];
 
-    Wins result;
     if (play1)
     {
-        // P1's turn
-        //cout << "Wins wins(play1=" << play1 << ", s1=" << s1 << ", p1=" << p1 << ", r1=" << r1 << ", s2=" << s2 << ", p2=" << p2 << ", r2=" << r2 << ")\n";
-
         p1  = (p1 + r1 - 1) % 10 + 1;
         s1 += p1;
-        if (s1 >= 21)
-        {
-            //cout << "p1 wins\n";
-            return {1U, 0U};
-        } 
-    
-        vector<int> x{turn, 1, s1, p1, r1, s2, p2, r2};
-        size_t k = make_key(x); 
-        if (games.find(k) != games.end()) return games[k];
+        if (s1 >= 21) return {1U, 0U};
 
-        // 27 possible universes in which P2 can win.
+        Wins result{};
         for (auto i: aoc::range{rolls.size()})
-        {
-            vector<int> x{turn+1, 2, s1, p1, r1, s2, p2, rolls[i]};
-            size_t k = make_key(x); 
+            result += wins(turn+1, false, s1, p1, 0, s2, p2, rolls[i]);
 
-            result = wins(turn+1, false, s1, p1, r1, s2, p2, rolls[i]);
-            games[k] = result;            
-        }
+        games[k] = result;
+        return result;
     }
     else
     {        
-        // P2's turn
-        //cout << "Wins wins(play1=" << play1 << ", s1=" << s1 << ", p1=" << p1 << ", r1=" << r1 << ", s2=" << s2 << ", p2=" << p2 << ", r2=" << r2 << ")\n";
-
         p2  = (p2 + r2 - 1) % 10 + 1;
         s2 += p2;
-        if (s2 >= 21)
-        {
-            //cout << "p2 wins\n";
-            return {0U, 1U};
-        } 
+        if (s2 >= 21) return {0U, 1U};
 
-        vector<int> x{turn, 2, s1, p1, r1, s2, p2, r2};
-        size_t k = make_key(x); 
-        if (games.find(k) != games.end()) return games[k];
-
-        // 27 possible universes in which P1 can win.
+        Wins result{};
         for (auto i: aoc::range{rolls.size()})
-        {
-            vector<int> x{turn+1, 1, s1, p1, rolls[i], s2, p2, r2};
-            size_t k = make_key(x); 
+            result += wins(turn+1, true, s1, p1, rolls[i], s2, p2, 0);
 
-            result = wins(turn+1, true, s1, p1, rolls[i], s2, p2, r2);
-            games[k] = result;            
-        }
+        games[k] = result;
+        return result;
     }
 
-    return result;
+    return {};
 }
 
 
