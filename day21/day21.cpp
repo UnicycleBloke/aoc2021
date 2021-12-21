@@ -25,32 +25,210 @@
 // }
 
 
-template <typename T>
-auto part1(T input)
+int rolls = 0;
+int roll()
 {
-    aoc::timer timer;
-    return 0;
+    static int value = -1;
+
+    ++rolls;
+    value = (value + 1) % 100;
+    return value +1;
 }
 
 
-template <typename T>
-auto part2(T input)
+auto part1()
 {
-    aoc::timer timer;
-    return 0;
+    int p1 = 4; //9;
+    int p2 = 8; // 6;
+
+    int s1 = 0;
+    int s2 = 0;
+
+    while (true)
+    {
+        int r1 = roll() + roll() + roll();
+        p1 = (p1 + r1 - 1) % 10 + 1;
+        s1 += p1;
+        ///cout << "p1 " << p1 << " " << s1 << '\n';
+        if (s1 >= 1000) break;
+
+        int r2 = roll() + roll() + roll();
+        p2 = (p2 + r2 - 1) % 10 + 1;
+        s2 += p2;
+        //cout << "p2 " << p2 << " " << s2 << '\n';
+        if (s2 >= 1000) break;
+    }
+
+    //cout << "p1 " << p1 << " " << s1 << '\n';
+    //cout << "p2 " << p2 << " " << s2 << '\n';
+
+    return min(s1, s2) * rolls;
+}
+
+
+struct Wins
+{
+    uint64_t p1{};
+    uint64_t p2{};
+
+    Wins& operator+=(Wins w)
+    {
+        p1 += w.p1;
+        p2 += w.p2;
+        return *this;
+    };
+
+    friend Wins operator+(Wins w1, Wins w2)
+    {
+        return Wins{w1.p1 + w2.p1, w1.p2 + w2.p2 };
+    }
+};
+
+
+struct Key
+{
+    int t; // turn 
+    int s; //core;
+    int p; //os;
+    int r; //oll;
+};
+
+
+bool operator<(Key a, Key b)
+{
+    if ((a.t <  b.t)) return true;
+    if ((a.t == b.t) && (a.s <  b.s)) return true;
+    if ((a.t == b.t) && (a.s == b.s) && (a.p <  b.p)) return true;
+    if ((a.t == b.t) && (a.s == b.s) && (a.p == b.p) && (a.r < a.r)) return true;
+    return false;
+}
+
+
+map<size_t, Wins> games;
+int keys = 0;
+
+
+size_t make_key(const vector<int>& vec) 
+{
+    size_t seed = vec.size();
+    for(auto& i : vec) 
+        seed ^= i + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    return seed;
+}
+
+
+Wins wins(int turn, bool play1, int s1, int p1, int r1, int s2, int p2, int r2)
+{
+    constexpr array<int, 27> rolls
+    {
+        3,4,5, 4,5,6, 5,6,7, 
+        4,5,6, 5,6,7, 6,7,8, 
+        5,6,7, 6,7,8, 7,8,9
+    };
+
+    // vector<int> x{turn, play1 ? 1 : 2, s1, p1, r1, s2, p2, r2};
+    // size_t k = make_key(x); 
+    // if (games.find(k) != games.end()) return games[k];
+
+    Wins result;
+    if (play1)
+    {
+        // P1's turn
+        //cout << "Wins wins(play1=" << play1 << ", s1=" << s1 << ", p1=" << p1 << ", r1=" << r1 << ", s2=" << s2 << ", p2=" << p2 << ", r2=" << r2 << ")\n";
+
+        p1  = (p1 + r1 - 1) % 10 + 1;
+        s1 += p1;
+        if (s1 >= 21)
+        {
+            //cout << "p1 wins\n";
+            return {1U, 0U};
+        } 
+    
+        vector<int> x{turn, 1, s1, p1, r1, s2, p2, r2};
+        size_t k = make_key(x); 
+        if (games.find(k) != games.end()) return games[k];
+
+        // 27 possible universes in which P2 can win.
+        for (auto i: aoc::range{rolls.size()})
+        {
+            vector<int> x{turn+1, 2, s1, p1, r1, s2, p2, rolls[i]};
+            size_t k = make_key(x); 
+
+            result = wins(turn+1, false, s1, p1, r1, s2, p2, rolls[i]);
+            games[k] = result;            
+        }
+    }
+    else
+    {        
+        // P2's turn
+        //cout << "Wins wins(play1=" << play1 << ", s1=" << s1 << ", p1=" << p1 << ", r1=" << r1 << ", s2=" << s2 << ", p2=" << p2 << ", r2=" << r2 << ")\n";
+
+        p2  = (p2 + r2 - 1) % 10 + 1;
+        s2 += p2;
+        if (s2 >= 21)
+        {
+            //cout << "p2 wins\n";
+            return {0U, 1U};
+        } 
+
+        vector<int> x{turn, 2, s1, p1, r1, s2, p2, r2};
+        size_t k = make_key(x); 
+        if (games.find(k) != games.end()) return games[k];
+
+        // 27 possible universes in which P1 can win.
+        for (auto i: aoc::range{rolls.size()})
+        {
+            vector<int> x{turn+1, 1, s1, p1, rolls[i], s2, p2, r2};
+            size_t k = make_key(x); 
+
+            result = wins(turn+1, true, s1, p1, rolls[i], s2, p2, r2);
+            games[k] = result;            
+        }
+    }
+
+    return result;
+}
+
+
+auto part2()
+{
+    constexpr array<int, 27> rolls
+    {
+        3,4,5, 4,5,6, 5,6,7, 
+        4,5,6, 5,6,7, 6,7,8, 
+        5,6,7, 6,7,8, 7,8,9
+    };
+
+    int p1start = 4;
+    int p2start = 8;
+
+    Wins result;
+    // 27 possible universes in which P1 can win.
+    for (auto i: aoc::range{rolls.size()})
+        result += wins(1, true, 0, p1start, rolls[i], 0, p2start, 0);
+
+    cout << p1start << ' ' << p2start << '\n';
+    cout << result.p1 << '\n';       
+    cout << result.p2 << '\n';      
+
+    // for (auto [k,v]: games)
+    // {
+    //     auto [p1, p2] = v;
+    //     cout << k << ' ' << p1 << ' ' << p2 << '\n';       
+    // } 
+    // cout << keys << ' ' << games.size() << '\n';       
+
+    return max(result.p1, result.p2);
 }
 
 
 void run(const char* filename)
 {
-    auto input = aoc::read_lines(filename);
-    //auto input = aoc::read_lines<int, int, int, int>(filename, R"((\d+),(\d+)\s->\s(\d+),(\d+))");
-
-    auto p1 = part1(input);
+    auto p1 = part1();
     cout << "Part1: " << p1 << '\n';
     //aoc::check_result(p1, 0);
 
-    auto p2 = part2(input);
+    auto p2 = part2();
     cout << "Part2: " << p2 << '\n';
     //aoc::check_result(p2, 0);
 }
