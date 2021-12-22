@@ -60,6 +60,8 @@ struct Wins
 };
 
 
+
+// Beware key collisions when creating a hash and using a regular map.
 size_t make_key(const vector<int>& vec) 
 {
     size_t seed = 0;   

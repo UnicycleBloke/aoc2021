@@ -44,7 +44,8 @@
 - Day 20:
     - A **cellular automaton** very similar to **Conway's Game of Life** but with a more complicated rule for next state. The trick was that the grid extended to infinity but the edges toggled 0 and 1 values.
 
-- Day 21:
+- Day 21: Dirac Dice
+    - An exercise in **dynamic programming** (I used a recursive approach) to count two stupidly large numbers. Beware **hash collisions** - pretty sure these cost me hours.
 - Day 22:
 - Day 23:
 - Day 24:
