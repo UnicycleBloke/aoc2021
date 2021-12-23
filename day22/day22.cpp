@@ -38,67 +38,45 @@ int64_t part2(const vector<Cuboid>& input, bool init)
 {
     aoc::timer timer;
 
-    vector<Cuboid> rules{};
-
-    size_t x = 0;
-    do 
+    int64_t sum = 0;
+    vector<Cuboid> cuboids{};
+    for (const auto& t: input) 
     {
-        auto t = input[x++];
-       
+        // Warm up.
         if (init)
         {
-            if (t.x1 < -50) continue;
-            if (t.y1 < -50) continue;
-            if (t.z1 < -50) continue;
-
-            if (t.x2 > 50) continue;
-            if (t.y2 > 50) continue;
-            if (t.z2 > 50) continue;
+            if ((t.x1 < -50) || (t.x2 > 50)) continue;
+            if ((t.y1 < -50) || (t.y2 > 50)) continue;
+            if ((t.z1 < -50) || (t.z2 > 50)) continue;
         }
 
-        vector<Cuboid> rules2;
-        if (t.on) 
+        // Just maintain a collection of cuboids, of increasing numbers of intersected initial cuboids, with sign 
+        // sign changing on each new intersection. The logic is that the volume of:
+        // - A and B combined is vol(A) + vol(B) - vol(A|B). 
+        // - A, B and C combined is vol(A) + vol(B) - vol(A|B) + vol(C) - vol(A|C) - vol(B|C) + vol(A|B|C). 
+        // - ...
+        for (auto j: aoc::range{cuboids.size()})
         {
-            rules2 = rules;
-            rules2.push_back(t);
-
-            for (auto u: rules)
+            const auto& u = cuboids[j];
+            auto i = intersect(u, t);
+            auto v = volume(i);
+            if (v != 0)
             {
-                auto i = intersect(u, t);
-                if (volume(i) != 0)
-                {
-                    rules2.push_back(i);
-                }
-            }
-        }
-        else
-        {
-            for (auto u: rules)
-            {
-                constexpr int CUBEMAX = 10'000'000; 
-                constexpr int CUBEMIN = -CUBEMAX; 
-                auto i1 = intersect(u, Cuboid{true, t.x2+1,  CUBEMAX, CUBEMIN, CUBEMAX, CUBEMIN, CUBEMAX, -1});
-                if (volume(i1) != 0) rules2.push_back(i1);
-                auto i2 = intersect(u, Cuboid{true, CUBEMIN, t.x1-1,  CUBEMIN, CUBEMAX, CUBEMIN, CUBEMAX, -1});
-                if (volume(i2) != 0) rules2.push_back(i2);
-                auto i3 = intersect(u, Cuboid{true, t.x1,    t.x2,    t.y2+1,  CUBEMAX, CUBEMIN, CUBEMAX, -1});
-                if (volume(i3) != 0) rules2.push_back(i3);
-                auto i4 = intersect(u, Cuboid{true, t.x1,    t.x2,    CUBEMIN, t.y1-1,  CUBEMIN, CUBEMAX, -1});
-                if (volume(i4) != 0) rules2.push_back(i4);
-                auto i5 = intersect(u, Cuboid{true, t.x1,    t.x2,    t.y1,    t.y2,    t.z2+1,  CUBEMAX, -1});
-                if (volume(i5) != 0) rules2.push_back(i5);
-                auto i6 = intersect(u, Cuboid{true, t.x1,    t.x2,    t.y1,    t.y2,    CUBEMIN, t.z1-1,  -1});
-                if (volume(i6) != 0) rules2.push_back(i6);
+                sum += v;
+                cuboids.push_back(i);
             }
         }
 
-        rules = rules2;
+        // The negative volumes in the input really threw me for a long time, but many doodles indicated that 
+        // any intersection which started from a negative volume made no contribution to the total volume. Taking
+        // out the whole chain of intersection is just a case of not placing the original negative volume in the 
+        // collection.
+        if (t.on)
+        {
+            sum += volume(t);
+            cuboids.push_back(t);
+        } 
     }
-    while (x < input.size());
-
-    int64_t sum = 0;
-    for (auto u: rules)
-        sum += volume(u);
 
     return sum;
 }
@@ -108,6 +86,7 @@ void run(const char* filename)
 {
     auto lines = aoc::read_lines<string, int, int, int, int, int, int>(filename, R"((\w+) x=(-?\d+)..(-?\d+),y=(-?\d+)..(-?\d+),z=(-?\d+)..(-?\d+))");
 
+    // Created Cuboid only to add the sign value. Pity.
     vector<Cuboid> input;
     for (auto [on, x1,x2, y1,y2, z1,z2] : lines)
     {
