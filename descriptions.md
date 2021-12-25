@@ -25,7 +25,7 @@
 - Day 11: Dumbo Octopus 
     - **Cellular automaton** with a small rectangular grid. 
 - Day 12: Passage Pathing 
-    - Counting paths in a graph (caves are nodes, tunnels are edges). DFS or BFS both work well.
+    - **Counting paths in a graph** (caves are nodes, tunnels are edges). DFS or BFS both work well.
 - Day 13: Transparent Origami 
     - Folding a large grid of points on X and Y axes to recover a code word.
 - Day 14: Extended Polymerization
@@ -46,8 +46,12 @@
 
 - Day 21: Dirac Dice
     - An exercise in **dynamic programming** (I used a recursive approach) to count two stupidly large numbers. Beware **hash collisions** - pretty sure these cost me hours.
-- Day 22:
-- Day 23:
-- Day 24:
-- Day 25:
+- Day 22: Reactor Reboot
+    - Calculate the total volume of a bunch of **intersecting volumes**. Easy but I wasted much time thinking about how to account for the "off" volumes (trivial) when my code didn't work. Should have double checked the intersection calculation!
+- Day 23: Amphipod 
+    - Essentially a sliding tile puzzle to shuffle creatures around their burrow. I got a solution, but could not work out how to make it faster with a cache or whatever.
+- Day 24: Arithmetic Logic Unit
+    - Input is ASM for a program you need to run (by inspection or otherwise). Program determines whether a 14-digit input is valid. Find highest valid input. This one defeated me. I need to think about how to optimise or even just solve by inspection. Most of the instructions seem to dramatically reduce the possible outcomes. Is is dynamic? Is it a search like Day 15?
+- Day 25: Sea Cucumber
+    - A straightforward **cellular automaton** with two stages in each step.
 
