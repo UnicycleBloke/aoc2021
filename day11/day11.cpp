@@ -112,11 +112,11 @@ void run(const char* filename)
 
     auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 1681);
+    aoc::check_result(p1, 1721);
 
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 276);
+    aoc::check_result(p2, 298);
 }
 
 

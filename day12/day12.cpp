@@ -205,13 +205,13 @@ void run(const char* filename)
         visits[to]    = 0;
     }
 
-    // auto p1 = part1(input);
-    // cout << "Part1: " << p1 << '\n';
-    // aoc::check_result(p1, 3410);
+    auto p1 = part1(input);
+    cout << "Part1: " << p1 << '\n';
+    aoc::check_result(p1, 4749);
 
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 98796);
+    aoc::check_result(p2, 123054);
 
     // auto [q1, q2] = search2(input);
     // cout << "Part1: " << q1 << '\n';

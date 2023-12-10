@@ -88,7 +88,7 @@ void run(const char* filename)
 
     auto p1 = part1(points, folds);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 785U);
+    aoc::check_result(p1, 763U);
 
     auto p2 = part2(points, folds);
     cout << "Part2: is read off the screen\n";

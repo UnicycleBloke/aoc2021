@@ -147,9 +147,9 @@ void part2(Burrow b, int& min_cost)
     {       
         min_cost = min(b.cost, min_cost);
      
-        ++counter;
-        if ((counter % 100000) == 0)
-            cout << "min_cost " << min_cost << " " << counter << '\n';
+        // ++counter;
+        // if ((counter % 100000) == 0)
+        //     cout << "min_cost " << min_cost << " " << counter << '\n';
         return;
     }
     if (b.cost >= min_cost) return;
@@ -200,17 +200,13 @@ void run(const char* filename)
     }
     b.home = at_home(b);
 
+    Burrow b2 = b;
+
     aoc::timer timer;
     
     int min_cost = IMPOSSIBLE;
     part2(b, min_cost);
-    cout << "final min_cost " << min_cost << '\n';
-    // cout << "Part2: " << p1 << '\n';
-    //aoc::check_result(p1, 3410);
-
-    // auto p2 = part2(b);
-    // cout << "Part2: " << p2 << '\n';
-    //aoc::check_result(p2, 98796);
+    cout << "Result: " << min_cost << '\n';
 }
 
 

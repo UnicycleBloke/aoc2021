@@ -368,9 +368,9 @@ void run(const char* filename)
     cout << "Part1: " << p1 << '\n';
     aoc::check_result(p1, 3647);
 
-    // auto p2 = part2(input);
-    // cout << "Part2: " << p2 << '\n';
-    // aoc::check_result(p2, 4600);
+    auto p2 = part2(input);
+    cout << "Part2: " << p2 << '\n';
+    aoc::check_result(p2, 4656);
 }
 
 

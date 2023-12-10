@@ -134,8 +134,8 @@ void run(const char* filename)
         part2 += val;
     }
 
-    aoc::check_result<size_t>(part1, 416U);
-    aoc::check_result<size_t>(part2, 1043697U);
+    aoc::check_result<size_t>(part1, 272U);
+    aoc::check_result<size_t>(part2, 1007675U);
 
     cout << "Part 1; " << part1 << '\n';
     cout << "Part 2; " << part2 << '\n';

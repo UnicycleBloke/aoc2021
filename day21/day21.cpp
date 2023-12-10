@@ -136,11 +136,11 @@ auto part2(int p1start, int p2start)
 
 int main(int argc, char** argv)
 {
-    auto p1 = part1(9, 6);
+    auto p1 = part1(4, 10);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 1'004'670);
+    aoc::check_result(p1, 855624U);
 
-    auto p2 = part2(9, 6);
+    auto p2 = part2(4, 10);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 492'043'106'122'795U);
+    aoc::check_result(p2, 187451244607486U);
 }

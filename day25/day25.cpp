@@ -84,7 +84,7 @@ void run(const char* filename)
 
     auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 360);
+    aoc::check_result(p1, 568);
 }
 
 

@@ -98,9 +98,9 @@ int main(int argc, char** argv)
     
     auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 3895776);
+    aoc::check_result(p1, 3309596);
 
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 7928162);
+    aoc::check_result(p2, 2981085);
 }

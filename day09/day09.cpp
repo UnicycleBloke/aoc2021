@@ -1,5 +1,6 @@
 #include "utils.h"
-#ifdef __unix__
+// TODO rename to __unix__ in several places to render the output.
+#ifdef __unixxxx__
 #include "/usr/include/ncurses.h"
 #endif
 
@@ -33,7 +34,7 @@ auto part1(const T& input)
 template <typename T>
 auto render(T& input)
 {
-#ifdef __unix__
+#ifdef __unixxxx__
     for (auto i: aoc::range{1U, input.size()-1U})
     {
         for (auto j: aoc::range{1U, input[i].size()-1U})
@@ -158,17 +159,17 @@ void run_impl(const char* filename)
 
     auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 494);
+    aoc::check_result(p1, 514);
 
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 1048128);
+    aoc::check_result(p2, 1103130);
 }
 
 
 void run(const char* filename)
 {
-#ifdef __unix__
+#ifdef __unixxxx__
     initscr(); 
     // if (has_colors() == FALSE) 
     // {
@@ -186,7 +187,7 @@ void run(const char* filename)
 
     run_impl(filename);
 
-#ifdef __unix__
+#ifdef __unixxxx__
     endwin();
 #endif    
 }

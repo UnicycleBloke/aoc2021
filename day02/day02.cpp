@@ -21,7 +21,7 @@ int part1(const T& input)
         }
     }
 
-    aoc::check_result(x*y, 2322630);
+    aoc::check_result(x*y, 1451208);
     return x*y;
 }
 
@@ -43,7 +43,7 @@ int part2(const T& input)
         }
     }
 
-    aoc::check_result(x*y, 2105273490);
+    aoc::check_result(x*y, 1620141160);
     return x*y;
 }
 

@@ -35,11 +35,11 @@ void run(const char* filename)
 
     auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 340052);
+    aoc::check_result(p1, 343441);
 
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 92948968);
+    aoc::check_result(p2, 98925151);
 }
 
 

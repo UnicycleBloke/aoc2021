@@ -119,6 +119,6 @@ for row in range(4):
         z.append(maze[line+2][3+row*2])
 
 path = search("".join(z))
-for state in path[::-1]:
-    display(state)
-    print()
+# for state in path[::-1]:
+#     display(state)
+#     print()

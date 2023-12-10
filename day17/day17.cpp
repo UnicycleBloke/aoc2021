@@ -90,9 +90,9 @@ void run(const char* filename)
 
     auto ans = part2(xmin, xmax, ymin, ymax);
     cout << "Part1: " << ans.first << '\n';
-    aoc::check_result(ans.first, 6555);
+    aoc::check_result(ans.first, 3003);
     cout << "Part2: " << ans.second << '\n';
-    aoc::check_result(ans.second, 4973);
+    aoc::check_result(ans.second, 940);
 }
 
 

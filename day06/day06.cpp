@@ -27,11 +27,11 @@ void run(const char* filename)
 
     auto p1 = reproduce(input, 80);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 390011UL);
+    aoc::check_result(p1, 385391UL);
 
     auto p2 = reproduce(input, 256);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 1746710169834UL);
+    aoc::check_result(p2, 1728611055389UL);
 }
 
 

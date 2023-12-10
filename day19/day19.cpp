@@ -366,11 +366,11 @@ void run(const char* filename)
 
     auto p1 = part1(scanners);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 459U);
+    aoc::check_result(p1, 440U);
 
     auto p2 = part2(scanners);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 19130);
+    aoc::check_result(p2, 13382);
 }
 
 

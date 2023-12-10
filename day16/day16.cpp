@@ -147,6 +147,9 @@ uint8_t from_hex(char c)
 // I parsed the expression in an AST and then used that to calculated the answers. 
 // Fun but a waste of time. All I really needed to do for Part 1 was this, which 
 // skips everything to add the versions on the fly.
+//
+// Actually this failed when I ran with different input (logged in as Github rather than Google),
+// so I reverted to the other method, which did work.
 uint64_t part1(Input& input)
 {
     uint64_t result = input.take(3);   
@@ -237,26 +240,26 @@ void run(const char* filename)
         bits.push_back((i & 1) > 0); 
     }
 
-    // Input input{bits, 0U};
-    // Packet toplevel = read_packet(input, true);
-    // toplevel.print();
+    Input input{bits, 0U};
+    Packet toplevel = read_packet(input, true);
+    //toplevel.print();
    
     {
         aoc::timer timer;
         Input input1{bits, 0U};
-        //auto p1 = toplevel.total_ver();
-        auto p1 = part1(input1);
+        auto p1 = toplevel.total_ver();
+        //auto p1 = part1(input1);
         cout << "Part1: " << p1 << '\n';
-        aoc::check_result(p1, 889U);
+        aoc::check_result(p1, 925U);
     }
 
     {
         aoc::timer timer;
         Input input2{bits, 0U};
-        //auto p2 = toplevel.value();
-        auto p2 = part2(input2);
+        auto p2 = toplevel.value();
+        //auto p2 = part2(input2);
         cout << "Part2: " << p2 << '\n';
-        aoc::check_result(p2, 739303923668U);
+        aoc::check_result(p2, 342997120375U);
     }
 }
 

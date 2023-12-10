@@ -141,7 +141,7 @@ void run(const char* filename)
 
     auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 462U);
+    aoc::check_result(p1, 403U);
 
     auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';

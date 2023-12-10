@@ -105,11 +105,11 @@ void run(const char* filename)
 
     auto p1 = solve(state, ends, rules, 10);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 2027U);
+    aoc::check_result(p1, 2194U);
 
     auto p2 = solve(state, ends, rules, 40);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 2265039461737U);
+    aoc::check_result(p2, 2360298895777U);
 }
 
 

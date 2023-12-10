@@ -1,5 +1,5 @@
 #include "utils.h"
-#include "cpp_curses.h"
+//#include "cpp_curses.h"
 
 
 int value(const vector<vector<int>>& grid, int r, int c)
@@ -119,11 +119,11 @@ void run(const char* filename)
 
     auto p1 = part1(algo, grid);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 5218);
+    aoc::check_result(p1, 5044);
 
     auto p2 = part2(algo, grid);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 15527);
+    aoc::check_result(p2, 18074);
 }
 
 

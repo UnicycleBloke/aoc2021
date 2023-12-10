@@ -127,11 +127,11 @@ void run(const char* filename)
 
     auto p1 = part1(calls, boards);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 28082);
+    aoc::check_result(p1, 16674);
 
     auto p2 = part2(calls, boards);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 8224);
+    aoc::check_result(p2, 7075);
 }
 
 
